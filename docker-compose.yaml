@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aprove-me-backend
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-file:./dev.db}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-60s}
+      - PORT=${PORT:-3000}
+      - NODE_ENV=${NODE_ENV:-production}
+    volumes:
+      - ./backend/prisma:/app/prisma
+      - backend-data:/app/prisma
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && yarn start:prod"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${PORT:-3000}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  backend-data:
+    driver: local
