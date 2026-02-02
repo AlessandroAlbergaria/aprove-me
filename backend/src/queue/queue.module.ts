@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { QueueService } from './queue.service';
+import { PayableBatchProcessor } from './payable-batch.processor';
+import { PayableModule } from '../modules/payable/payable.module';
+import { AssignorModule } from '../modules/assignor/assignor.module';
 
 @Module({
   imports: [
@@ -21,8 +24,10 @@ import { QueueService } from './queue.service';
         },
       },
     ]),
+    PayableModule,
+    AssignorModule,
   ],
-  providers: [QueueService],
-  exports: [ClientsModule, QueueService],
+  providers: [QueueService, PayableBatchProcessor],
+  exports: [ClientsModule, QueueService, PayableBatchProcessor],
 })
 export class QueueModule {}

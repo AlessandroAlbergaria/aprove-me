@@ -1,0 +1,163 @@
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { connect } from 'amqplib';
+import { PayableService } from '../modules/payable/payable.service';
+import { AssignorService } from '../modules/assignor/assignor.service';
+
+interface BatchMessage {
+  batchId: string;
+  payables: Array<{
+    id: string;
+    value: number;
+    emissionDate: string;
+    assignor: string;
+  }>;
+  totalPayables: number;
+  createdAt: string;
+}
+
+interface BatchStats {
+  batchId: string;
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  errors: Array<{ payableId: string; error: string }>;
+}
+
+@Injectable()
+export class PayableBatchProcessor implements OnModuleInit {
+  private readonly logger = new Logger(PayableBatchProcessor.name);
+  private connection: Awaited<ReturnType<typeof connect>> | null = null;
+  private channel: Awaited<
+    ReturnType<Awaited<ReturnType<typeof connect>>['createChannel']>
+  > | null = null;
+
+  constructor(
+    private readonly payableService: PayableService,
+    private readonly assignorService: AssignorService,
+  ) {}
+
+  async onModuleInit() {
+    await this.startConsumer();
+  }
+
+  private async startConsumer() {
+    try {
+      const rabbitMQUrl =
+        process.env.RABBITMQ_URL || 'amqp://admin:admin@localhost:5672';
+      const queueName = process.env.RABBITMQ_QUEUE || 'payable-batch';
+
+      this.connection = await connect(rabbitMQUrl);
+      this.channel = await this.connection.createChannel();
+
+      await this.channel.prefetch(1);
+
+      this.logger.log(`Starting consumer for queue: ${queueName}`);
+
+      await this.channel.consume(
+        queueName,
+        async (msg) => {
+          if (!msg) return;
+
+          try {
+            const content = msg.content.toString();
+            const batchMessage: BatchMessage = JSON.parse(content);
+
+            this.logger.log(
+              `Processing batch ${batchMessage.batchId} with ${batchMessage.totalPayables} payables`,
+            );
+
+            const stats = await this.processBatch(batchMessage);
+
+            this.logger.log(
+              `Batch ${stats.batchId} completed: ${stats.succeeded} succeeded, ${stats.failed} failed`,
+            );
+
+            this.channel?.ack(msg);
+          } catch (error) {
+            this.logger.error('Error processing message', error);
+
+            const retryCount =
+              (msg.properties.headers?.['x-retry-count'] || 0) + 1;
+
+            if (retryCount >= 4) {
+              this.logger.warn(
+                `Message exceeded retry limit (${retryCount}), moving to DLQ`,
+              );
+              this.channel?.nack(msg, false, false);
+            } else {
+              this.logger.log(`Retrying message (attempt ${retryCount}/4)`);
+
+              if (this.channel) {
+                await this.channel.sendToQueue(queueName, msg.content, {
+                  headers: {
+                    ...msg.properties.headers,
+                    'x-retry-count': retryCount,
+                  },
+                });
+              }
+
+              this.channel?.ack(msg);
+            }
+          }
+        },
+        { noAck: false },
+      );
+
+      this.logger.log('Consumer started successfully');
+    } catch (error) {
+      this.logger.error('Failed to start consumer', error);
+      throw error;
+    }
+  }
+
+  private async processBatch(batchMessage: BatchMessage): Promise<BatchStats> {
+    const stats: BatchStats = {
+      batchId: batchMessage.batchId,
+      total: batchMessage.totalPayables,
+      processed: 0,
+      succeeded: 0,
+      failed: 0,
+      errors: [],
+    };
+
+    for (const payableData of batchMessage.payables) {
+      try {
+        await this.assignorService.findById(payableData.assignor);
+
+        await this.payableService.create({
+          id: payableData.id,
+          value: payableData.value,
+          emissionDate: payableData.emissionDate,
+          assignor: payableData.assignor,
+        });
+
+        stats.succeeded++;
+        this.logger.debug(`Payable ${payableData.id} created successfully`);
+      } catch (error) {
+        stats.failed++;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        stats.errors.push({
+          payableId: payableData.id,
+          error: errorMessage,
+        });
+        this.logger.error(`Failed to create payable ${payableData.id}`, error);
+      } finally {
+        stats.processed++;
+      }
+    }
+
+    return stats;
+  }
+
+  async onModuleDestroy() {
+    try {
+      await this.channel?.close();
+      await this.connection?.close();
+      this.logger.log('Consumer connection closed');
+    } catch (error) {
+      this.logger.error('Error closing consumer connection', error);
+    }
+  }
+}
