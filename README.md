@@ -1,261 +1,815 @@
-<p align="center">
-  <img src="./assets/logo-bankme.png" alt="Logo Bankme" width="91" height="108">
-</p>
-<h1 align="center">
-  Aprove-me
-</h1>
+# 💰 Aprove-me - Sistema de Gerenciamento de Recebíveis
 
-## Sumário
+<div align="center">
 
-- [Sumário](#sumário)
-- [❤️ Bem vindos](#️-bem-vindos)
-- [🚀 Vamos nessa!](#-vamos-nessa)
-  - [Dicas](#dicas)
-  - [Como você deverá desenvolver?](#como-você-deverá-desenvolver)
-  - [Qual o tempo para entregar?](#qual-o-tempo-para-entregar)
-- [💻 O Problema](#-o-problema)
-  - [Estrutura de um recebível](#estrutura-de-um-recebível)
-  - [Estrutrua de um cedente](#estrutrua-de-um-cedente)
-- [💾 Back-end](#-back-end)
-  - [Nível 1 - Validação](#nível-1---validação)
-  - [Nível 2 - Persistência](#nível-2---persistência)
-  - [Nível 3 - Testes](#nível-3---testes)
-  - [Nível 4 - Autenticação](#nível-4---autenticação)
-  - [Nível 5 - Gerenciamento de permissões](#nível-5---gerenciamento-de-permissões)
-  - [Nível 6 - Infra e Doc](#nível-6---infra-e-doc)
-  - [Nível 7 - Lotes](#nível-7---lotes)
-  - [Nível 8 - Resiliência](#nível-8---resiliência)
-  - [Nível 9 - Cloud](#nível-9---cloud)
-  - [Nível 10 - Infra as a Code](#nível-10---infra-as-a-code)
-- [🖥️ Front-end](#️-front-end)
-  - [Nível 1 - Cadastro](#nível-1---cadastro)
-  - [Nível 2 - Conectando na API](#nível-2---conectando-na-api)
-  - [Nível 3 - Listando](#nível-3---listando)
-  - [Nível 4 - Autenticação](#nível-4---autenticação-1)
-  - [Nível 5 - Testes](#nível-5---testes)
+![Logo Bankme](./assets/logo-bankme.png)
 
-## ❤️ Bem vindos 
+**Sistema fullstack para gerenciamento de recebíveis (payables) e cedentes (assignors)**
 
-Olá, tudo certo?
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)](https://www.rabbitmq.com/)
 
-Seja bem vindo ao teste de seleção para novos desenvolvedores na Bankme!
+</div>
 
-Estamos honrados que você tenha chegado até aqui!
+---
 
-Prepare aquele ☕️ , e venha conosco codar e se divertir!
+## 📋 Sobre o Projeto
 
-## 🚀 Vamos nessa!
+O **Aprove-me** é uma aplicação fullstack desenvolvida para gerenciar recebíveis financeiros e seus respectivos cedentes. O sistema oferece uma API REST robusta com autenticação JWT, processamento em lote com filas, e uma interface web moderna e responsiva.
 
-Este é um teste para analisarmos como você desempenha ao entender, traduzir, resolver e entregar um código que resolve um problema.
+### 🎯 Funcionalidades Principais
 
-### Dicas
+- ✅ **CRUD Completo** de Recebíveis (Payables) e Cedentes (Assignors)
+- ✅ **Autenticação JWT** com gerenciamento de usuários
+- ✅ **Processamento em Lote** com RabbitMQ e retry automático
+- ✅ **Notificações por Email** para operações em lote
+- ✅ **Interface Web** moderna e responsiva
+- ✅ **Documentação Swagger** interativa
+- ✅ **Testes Automatizados** (unitários e integração)
+- ✅ **Docker** para desenvolvimento e produção
+- ✅ **CI/CD** com GitHub Actions
+- ✅ **Infrastructure as Code** com Terraform
 
-- Documente;
-- Pergunte;
-- Mostre a sua linha de reciocínio;
-- Trabalhe bem o seu README.md;
+---
 
-### Como você deverá desenvolver?
+## 🏗️ Arquitetura
 
-1. Faça um clone deste projeto em seu GitHub pessoal;
-2. Realize as implementações de acordo com cada um dos níveis;
-3. Faça pequenos commits;
-4. Depois de sentir que fez o seu máximo, faça um PR para o repositório original. (Para conseguir fazer isso, não se esqueça de fazer um Fork antes de iniciar tudo!)
+```
+aprove-me/
+├── backend/              # API NestJS
+│   ├── src/
+│   │   ├── modules/      # Módulos da aplicação
+│   │   │   ├── auth/     # Autenticação JWT
+│   │   │   ├── users/    # Gerenciamento de usuários
+│   │   │   ├── payable/  # Recebíveis
+│   │   │   ├── assignor/ # Cedentes
+│   │   │   ├── integrations/ # Endpoints de integração
+│   │   │   ├── queue/    # Filas RabbitMQ
+│   │   │   └── mail/     # Notificações por email
+│   │   ├── common/       # Filtros, pipes, guards
+│   │   ├── config/       # Configurações
+│   │   └── database/     # Prisma ORM
+│   ├── prisma/           # Schema e migrations
+│   └── test/             # Testes E2E
+│
+├── frontend/             # Interface Next.js
+│   ├── src/
+│   │   ├── app/          # App Router (Next.js 14+)
+│   │   ├── components/   # Componentes React
+│   │   ├── contexts/     # Context API (Auth)
+│   │   ├── lib/          # Utilitários e API client
+│   │   └── types/        # TypeScript types
+│
+├── infrastructure/       # Infraestrutura
+│   ├── terraform/        # IaC para GCP
+│   └── local/            # Docker Compose local
+│
+├── .github/              # CI/CD
+│   └── workflows/        # GitHub Actions
+│
+└── scripts/              # Scripts auxiliares
+```
 
-**IMPORTANTE!**
+---
 
-Não significa que você precisa implementar todos os níveis para ser aprovado no processo!
+## 🚀 Tecnologias
 
-Faça até onde se sentir confortável.
+### Backend
 
-### Qual o tempo para entregar?
+| Tecnologia     | Versão | Descrição                     |
+| -------------- | ------ | ----------------------------- |
+| **Node.js**    | 18+    | Runtime JavaScript            |
+| **NestJS**     | 10+    | Framework backend progressivo |
+| **TypeScript** | 5+     | Superset JavaScript tipado    |
+| **Prisma**     | 7+     | ORM moderno para Node.js      |
+| **SQLite**     | 3+     | Banco de dados (dev)          |
+| **PostgreSQL** | 15+    | Banco de dados (prod)         |
+| **JWT**        | -      | Autenticação stateless        |
+| **Passport**   | -      | Estratégias de autenticação   |
+| **bcrypt**     | -      | Hash de senhas                |
+| **RabbitMQ**   | 3.12+  | Message broker para filas     |
+| **Nodemailer** | -      | Envio de emails               |
+| **Jest**       | -      | Framework de testes           |
+| **Swagger**    | -      | Documentação OpenAPI          |
 
-Nós temos um período para fechar a vaga em questão. Então, quanto antes você enviar, mais cuidado podemos ter na revisão do seu teste.
+### Frontend
 
-Mas sabemos que o dia a dia é corrido, faça de forma que fique confortável para você!
+| Tecnologia          | Versão | Descrição                    |
+| ------------------- | ------ | ---------------------------- |
+| **Next.js**         | 14+    | Framework React (App Router) |
+| **React**           | 18+    | Biblioteca UI                |
+| **TypeScript**      | 5+     | Tipagem estática             |
+| **Tailwind CSS**    | 3+     | Framework CSS utility-first  |
+| **React Hook Form** | 7+     | Gerenciamento de formulários |
+| **Zod**             | 3+     | Validação de schemas         |
+| **Axios**           | 1+     | Cliente HTTP                 |
+| **js-cookie**       | 3+     | Gerenciamento de cookies     |
+| **Jest**            | 29+    | Framework de testes          |
+| **Testing Library** | -      | Testes de componentes        |
 
-Mas não desista! Envie até onde conseguir.
+### DevOps
 
-## 💻 O Problema
+| Tecnologia         | Descrição                 |
+| ------------------ | ------------------------- |
+| **Docker**         | Containerização           |
+| **Docker Compose** | Orquestração local        |
+| **GitHub Actions** | CI/CD                     |
+| **Terraform**      | Infrastructure as Code    |
+| **GCP**            | Cloud provider (opcional) |
 
-Um cliente da Bankme solicitou uma nova funcionalidade, relacionada a recebíveis.
+---
 
-Todos os dias esse cliente movimenta vários recebíveis, e nosso time de operações estava ficando maluco tendo que cadastrar tudo isso de forma manual!
+## 📦 Pré-requisitos
 
-Os recebíveis são representações digitais de um documento que simula uma dívida a ser recebida. E para Bankme, é importante ter essas informações como parte do fluxo comercial que temos com este cliente.
+- **Node.js** 18+ e **Yarn**
+- **Docker** e **Docker Compose** (recomendado)
+- **Git**
 
-### Estrutura de um recebível
+---
 
-| CAMPO        | TIPO          | DESCRIÇÃO                                 |
-|--------------|---------------|-------------------------------------------|
-| id           | string (UUID) | É a identificação de um recebível.        |
-| value        | float         | É o valor do recebível.                   |
-| emissionDate | date          | É a data de emissão do recebível.         |
-| assignor     | string (UUID) | Representa a identificação de um cedente. |
+## 🔧 Instalação e Configuração
 
-### Estrutrua de um cedente
+### Opção 1: Docker Compose (Recomendado) 🐳
 
-| CAMPO    | TIPO          | DESCRIÇÃO                             |
-|----------|---------------|---------------------------------------|
-| id       | string (UUID) | É a identificação de um cedente.      |
-| document | string(30)    | É o documento CPF ou CNPJ do cedente. |
-| email    | string(140)   | É o email do cedente.                 |
-| phone    | string(20)    | É o telefone do cedente.              |
-| name     | string(140)   | É a nome ou razão social do cedente.  |
+A forma mais rápida de rodar o projeto completo:
 
-## 💾 Back-end
+```bash
+# 1. Clone o repositório
+git clone https://github.com/seu-usuario/aprove-me.git
+cd aprove-me
 
-### Nível 1 - Validação
+# 2. Configure as variáveis de ambiente
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 
-Implemente uma API utilizando NestJS que receba dados de um recebível e de um cedente.
+# 3. Suba os containers
+docker compose up -d
 
-A rota para este cadastro é:
+# 4. Aguarde os serviços ficarem prontos (~30s)
+docker compose ps
 
-`POST /integrations/payable`
+# 5. Acesse a aplicação
+# Frontend: http://localhost:3001
+# Backend: http://localhost:3000
+# Swagger: http://localhost:3000/api-docs
+# RabbitMQ: http://localhost:15672 (admin/admin)
+```
 
-Essa rota deverá receber todas as informações. É importante garantir a validação destes dados:
+**Pronto!** O sistema está rodando com:
 
-1. Nenhum campo pode ser nulo;
-2. Os ids devem ser do tipo UUID;
-3. As strings não podem ter caracteres a mais do que foi definido em sua estrutura;
+- ✅ Backend NestJS (porta 3000)
+- ✅ Frontend Next.js (porta 3001)
+- ✅ RabbitMQ (porta 5672, UI: 15672)
+- ✅ Banco SQLite persistente
+- ✅ Hot reload habilitado
 
-Se algum campo não estiver preenchido corretamente, deve-se retornar uma mensagem para o usuário mostrando qual o problema foi encontrado em qual campo.
+---
 
-Se todos os dados estiverem validados. Apenas retorne todos os dados em um formato JSON.
+### Opção 2: Instalação Local (Desenvolvimento)
 
-### Nível 2 - Persistência
+Para desenvolvimento sem Docker:
 
-Utilize o Prisma, para incluir um novo banco de dados SQLite.
+#### Backend
 
-Crie a estrutura de acordo com o que foi definido.
+```bash
+cd backend
 
-Caso os dados estejam válidos, cadastre-os.
+# Instalar dependências
+yarn install
 
-Crie 2 novas rotas:
+# Configurar ambiente
+cp .env.example .env
 
-`GET /integrations/payable/:id`
+# Gerar Prisma Client
+yarn prisma generate
 
-`GET /integrations/assignor/:id`
+# Executar migrations
+yarn prisma migrate dev
 
-Para que seja possível retornar pagáveis e cedentes de forma independete.
+# Criar usuário padrão
+yarn seed
 
-Inclua também rotas para as outras operações:
+# Iniciar servidor de desenvolvimento
+yarn start:dev
 
-- Edição;
-- Exclusão;
-- Cadastro;
+# Backend rodando em http://localhost:3000
+```
 
-### Nível 3 - Testes
+#### Frontend
 
-Crie testes unitários para cada arquivo da aplicação. Para cada nova implementação a seguir, também deve-se criar os testes.
+```bash
+cd frontend
 
-### Nível 4 - Autenticação
+# Instalar dependências
+yarn install
 
-Inclua um sistema de autenticação em todas as rotas.
+# Configurar ambiente
+cp .env.example .env
 
-Para isso, crie uma nova rota:
+# Iniciar servidor de desenvolvimento
+yarn dev
 
-`POST /integrations/auth` que deve receber:
+# Frontend rodando em http://localhost:3001
+```
+
+#### RabbitMQ (Opcional - para processamento em lote)
+
+```bash
+docker run -d \
+  --name rabbitmq \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  -e RABBITMQ_DEFAULT_USER=admin \
+  -e RABBITMQ_DEFAULT_PASS=admin \
+  rabbitmq:3-management-alpine
+```
+
+---
+
+## 🏃 Como Executar
+
+### Com Docker Compose
+
+```bash
+# Iniciar todos os serviços
+docker compose up -d
+
+# Ver logs em tempo real
+docker compose logs -f
+
+# Ver logs de um serviço específico
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# Parar todos os serviços
+docker compose down
+
+# Parar e remover volumes (limpar dados)
+docker compose down -v
+
+# Rebuild de um serviço
+docker compose up -d --build backend
+```
+
+### Localmente
+
+```bash
+# Backend
+cd backend
+yarn start:dev
+
+# Frontend (em outro terminal)
+cd frontend
+yarn dev
+```
+
+---
+
+## 🧪 Testes
+
+### Backend
+
+```bash
+cd backend
+
+# Testes unitários
+yarn test
+
+# Testes em watch mode
+yarn test:watch
+
+# Cobertura de testes
+yarn test:cov
+
+# Testes E2E
+yarn test:e2e
+```
+
+**Resultados:**
+
+- ✅ 67 testes passando
+- ✅ 10 test suites
+- ✅ Cobertura: 70%+
+
+### Frontend
+
+```bash
+cd frontend
+
+# Testes unitários
+yarn test
+
+# Testes em watch mode
+yarn test:watch
+
+# Cobertura de testes
+yarn test --coverage
+```
+
+**Resultados:**
+
+- ✅ 69 testes passando
+- ✅ 15 test suites
+- ✅ Cobertura: 50%+
+
+---
+
+## 🔑 Autenticação
+
+### Credenciais Padrão
+
+```
+Login: aprovame
+Senha: aprovame
+```
+
+### Obter Token JWT
+
+```bash
+curl -X POST http://localhost:3000/integrations/auth \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "aprovame",
+    "password": "aprovame"
+  }'
+```
+
+**Resposta:**
 
 ```json
 {
-  "login": "aprovame",
-  "password": "aprovame"
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-Com essas credenciais o endpoint deverá retornar um JWT com o tempo de expiração de 1 minuto.
+### Usar Token nas Requisições
 
-Reescreva as regras de todas as outras rotas para que o JWT seja enviado como parâmetro do `Header` da requisição.
+```bash
+curl -X GET http://localhost:3000/integrations/payable \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
 
-Se o JWT estiver válido, então os dados devem ser mostrados, caso contrário, deve-se mostrar uma mensagem de "Não autorizado".
+---
 
-### Nível 5 - Gerenciamento de permissões
+## 📡 Endpoints da API
 
-Agora, crie um sistema de gerenciamento de permissões.
+### Autenticação
 
-Crie um novo cadastro de permissões. Esse cadastro deve armazenar: `login` e `password`.
+| Método | Endpoint             | Descrição                 | Auth |
+| ------ | -------------------- | ------------------------- | ---- |
+| POST   | `/integrations/auth` | Login e obtenção de token | ❌   |
+| POST   | `/users`             | Cadastro de novo usuário  | ❌   |
 
-Refatore o endpoint de autenticação para que sempre se gere JWTs se login e senha estiverem cadastrados no Banco de Dados.
+### Recebíveis (Payables)
 
-### Nível 6 - Infra e Doc
+| Método | Endpoint                          | Descrição                  | Auth |
+| ------ | --------------------------------- | -------------------------- | ---- |
+| POST   | `/integrations/payable`           | Criar recebível            | ✅   |
+| GET    | `/integrations/payable/:id`       | Buscar recebível por ID    | ✅   |
+| GET    | `/integrations/payable`           | Listar todos os recebíveis | ✅   |
+| PATCH  | `/integrations/payable/:id`       | Atualizar recebível        | ✅   |
+| DELETE | `/integrations/payable/:id`       | Excluir recebível          | ✅   |
+| POST   | `/integrations/payable/batch`     | Criar lote de recebíveis   | ✅   |
+| GET    | `/integrations/payable/batch/dlq` | Listar falhas (DLQ)        | ✅   |
 
-Crie um `Dockerfile` para sua API.
+### Cedentes (Assignors)
 
-Crie um `docker-compose.yaml` para iniciar o seu projeto.
+| Método | Endpoint                     | Descrição                | Auth |
+| ------ | ---------------------------- | ------------------------ | ---- |
+| POST   | `/integrations/assignor`     | Criar cedente            | ✅   |
+| GET    | `/integrations/assignor/:id` | Buscar cedente por ID    | ✅   |
+| GET    | `/integrations/assignor`     | Listar todos os cedentes | ✅   |
+| PATCH  | `/integrations/assignor/:id` | Atualizar cedente        | ✅   |
+| DELETE | `/integrations/assignor/:id` | Excluir cedente          | ✅   |
 
-Documente tudo o que foi feito até aqui:
+**Documentação completa:** http://localhost:3000/api-docs
 
-- Como preparar o ambiente;
-- Como instalar as dependência;
-- Como rodar o projeto;
+---
 
-### Nível 7 - Lotes
+## 📝 Exemplos de Uso
 
-Crie um novo recurso de processamento de pagáveis por lotes.
+### 1. Criar um Cedente
 
-A ideia é que o cliente possa enviar um GRANDE número de pagáveis de uma única vez. E isso, não poderá ser processado de forma síncrona.
+```bash
+curl -X POST http://localhost:3000/integrations/assignor \
+  -H "Authorization: Bearer SEU_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "document": "12345678901",
+    "email": "cedente@example.com",
+    "phone": "11999999999",
+    "name": "João Silva"
+  }'
+```
 
-Crie um novo endpoint:
+### 2. Criar um Recebível
 
-`POST integrations/payable/batch`
+```bash
+curl -X POST http://localhost:3000/integrations/payable \
+  -H "Authorization: Bearer SEU_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payable": {
+      "id": "223e4567-e89b-12d3-a456-426614174000",
+      "value": 1500.50,
+      "emissionDate": "2024-01-15"
+    },
+    "assignor": {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "document": "12345678901",
+      "email": "cedente@example.com",
+      "phone": "11999999999",
+      "name": "João Silva"
+    }
+  }'
+```
 
-Neste endpoint deve ser possível receber lotes de até 10.000 pagáveis.
+### 3. Listar Recebíveis
 
-Ao receber todos os pagáveis, deve-se postá-los em uma fila.
+```bash
+curl -X GET http://localhost:3000/integrations/payable \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
 
-Crie um consumidor para esta fila que deverá pegar pagável por pagável, criar seu registro no banco de dados, e ao final do processamento do lote enviar um e-mail de lote processado, com o número de sucesso e falhas.
+### 4. Criar Lote de Recebíveis (até 10.000)
 
-### Nível 8 - Resiliência
+```bash
+curl -X POST http://localhost:3000/integrations/payable/batch \
+  -H "Authorization: Bearer SEU_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payables": [
+      {
+        "id": "323e4567-e89b-12d3-a456-426614174000",
+        "value": 1000.00,
+        "emissionDate": "2024-01-15",
+        "assignor": "123e4567-e89b-12d3-a456-426614174000"
+      },
+      {
+        "id": "423e4567-e89b-12d3-a456-426614174000",
+        "value": 2000.00,
+        "emissionDate": "2024-01-16",
+        "assignor": "123e4567-e89b-12d3-a456-426614174000"
+      }
+    ]
+  }'
+```
 
-Caso não seja possível processar algum ítem do lote, coloque-o novamente na fila. Isso deve ocorrer por até 4 vezes. Depois, esse ítem deve ir para uma "Fila Morta" e um e-mail deve ser disparado para o time de operações.
+**Resposta:**
 
-### Nível 9 - Cloud
+```json
+{
+  "batchId": "523e4567-e89b-12d3-a456-426614174000",
+  "totalPayables": 2,
+  "status": "queued",
+  "message": "Batch queued for processing",
+  "createdAt": "2024-01-15T10:30:00.000Z"
+}
+```
 
-Crie uma pipeline de deploy da aplicação em alguma estrutura de Cloud. (AWS, Google, Azure...)
+---
 
-### Nível 10 - Infra as a Code
+## 🌐 Interface Web
 
-Crie uma estrutura em terraforma que monte a infra-estrutura desejada.
+### Páginas Disponíveis
 
-## 🖥️ Front-end
+| Rota              | Descrição             | Auth |
+| ----------------- | --------------------- | ---- |
+| `/login`          | Página de login       | ❌   |
+| `/register`       | Cadastro de usuário   | ❌   |
+| `/payables`       | Lista de recebíveis   | ✅   |
+| `/payables/new`   | Criar recebível       | ✅   |
+| `/payables/[id]`  | Detalhes do recebível | ✅   |
+| `/assignors`      | Lista de cedentes     | ✅   |
+| `/assignors/new`  | Criar cedente         | ✅   |
+| `/assignors/[id]` | Detalhes do cedente   | ✅   |
 
-### Nível 1 - Cadastro
+### Funcionalidades da Interface
 
-Crie uma interface na qual é possível cadastrar os pagáveis.
+- ✅ **Autenticação** com JWT e cookies seguros
+- ✅ **Formulários** com validação em tempo real (Zod)
+- ✅ **Listagem** com paginação client-side
+- ✅ **CRUD Completo** de recebíveis e cedentes
+- ✅ **Responsivo** (desktop e mobile)
+- ✅ **Loading States** e feedback visual
+- ✅ **Proteção de Rotas** automática
+- ✅ **Formatação** de moeda e datas
 
-É importante que sua interface previna o cadastro de campos vazios, ou que não estejam nas regras definidas anteriormente.
+---
 
-Exiba o pagável cadastrado em uma nova tela.
+## 🗄️ Modelos de Dados
 
-### Nível 2 - Conectando na API
+### User (Usuário)
 
-Conecte a seu Front-end a API que foi criada, e faça o cadastro de um pagável refletir na sua API.
+```typescript
+{
+  id: string; // UUID
+  login: string; // Único, 3-50 caracteres
+  password: string; // Hash bcrypt
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
 
-Faça também uma tela para cadastro do cedente.
+### Assignor (Cedente)
 
-Altere o cadastro inicial para que o campo `assignor` seja um `combobox` no qual seja possível selecionar um cedente.
+```typescript
+{
+  id: string; // UUID
+  document: string; // CPF/CNPJ, único, max 30 chars
+  email: string; // Email válido, max 140 chars
+  phone: string; // Telefone, max 20 chars
+  name: string; // Nome, max 140 chars
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
 
-### Nível 3 - Listando
+### Payable (Recebível)
 
-Agora faça um sistema de listagens de pagáveis. Mostrando apenas: `id`, `value` e `emissionDate`.
+```typescript
+{
+  id: string; // UUID
+  value: number; // Valor positivo
+  emissionDate: Date; // Data de emissão
+  assignorId: string; // FK para Assignor
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
 
-Para cada ítem da lista, coloque um link que mostra os detalhes do pagável.
+---
 
-Além disso, coloque opções de editar e excluir.
+## 🔒 Segurança
 
-Nessa página de detalhes, inclua um novo link para exibir os dados do cedente.
+- ✅ **Senhas** hasheadas com bcrypt (salt rounds: 10)
+- ✅ **JWT** com expiração configurável (padrão: 24h)
+- ✅ **Rotas protegidas** com guards
+- ✅ **Validação** em todas as camadas
+- ✅ **CORS** configurado
+- ✅ **Helmet** para headers de segurança
+- ✅ **Rate Limiting** (opcional)
+- ✅ **SQL Injection** prevenido (Prisma ORM)
+- ✅ **XSS** prevenido (validações + sanitização)
 
-Todos os dados devem vir da API.
+---
 
-### Nível 4 - Autenticação
+## 📊 Processamento em Lote
 
-Implemente agora o sistema de login e senha para poder acessar as suas rotas de forma autenticada.
+### Como Funciona
 
-Armazene o token no `localStorage` do seu navegador.
+1. **Envio**: Cliente envia lote de até 10.000 recebíveis
+2. **Enfileiramento**: Lote é enfileirado no RabbitMQ
+3. **Processamento**: Worker processa item por item
+4. **Retry**: Até 4 tentativas com backoff exponencial
+5. **DLQ**: Falhas permanentes vão para Dead Letter Queue
+6. **Notificação**: Email enviado ao finalizar
 
-Caso o token expire, redirecione o usuário para a página de login.
+### Configuração
 
-### Nível 5 - Testes
+```bash
+# backend/.env
+RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+RABBITMQ_QUEUE=payable-batch
+RABBITMQ_DLQ=payable-batch-dlq
 
-Crie testes para sua aplicação Front-end.
+# Email (opcional)
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USER=seu-usuario
+SMTP_PASS=sua-senha
+EMAIL_FROM="Aprove-me <noreply@aprove-me.com>"
+EMAIL_TO_OPS=ops@aprove-me.com
+```
+
+### Monitoramento
+
+- **RabbitMQ UI**: http://localhost:15672
+- **Logs**: `docker compose logs -f backend`
+- **DLQ Endpoint**: `GET /integrations/payable/batch/dlq`
+
+---
+
+## 🐳 Docker
+
+### Comandos Úteis
+
+```bash
+# Ver status dos containers
+docker compose ps
+
+# Ver logs
+docker compose logs -f
+
+# Entrar em um container
+docker compose exec backend sh
+docker compose exec frontend sh
+
+# Executar comandos no backend
+docker compose exec backend yarn test
+docker compose exec backend npx prisma migrate dev
+
+# Rebuild completo
+docker compose down -v
+docker compose build --no-cache
+docker compose up -d
+
+# Ver uso de recursos
+docker stats
+```
+
+### Healthchecks
+
+Todos os serviços possuem healthchecks configurados:
+
+```bash
+# Verificar saúde
+docker compose ps
+
+# Status esperado: healthy
+```
+
+---
+
+## 🚀 Deploy
+
+### Opção 1: Docker Compose (Produção)
+
+```bash
+# Build de produção
+docker compose -f docker-compose.prod.yml up -d
+
+# Variáveis de ambiente de produção
+cp .env.example .env.production
+# Editar .env.production com valores reais
+```
+
+### Opção 2: Cloud (GCP)
+
+O projeto inclui configuração Terraform para GCP:
+
+```bash
+cd infrastructure/terraform
+
+# Inicializar Terraform
+terraform init
+
+# Planejar mudanças
+terraform plan
+
+# Aplicar infraestrutura
+terraform apply
+
+# Ver documentação completa
+cat README.md
+```
+
+**Recursos criados:**
+
+- Cloud Run (Backend)
+- Cloud SQL (PostgreSQL)
+- Cloud Memorystore (Redis)
+- Cloud Storage (Assets)
+- VPC e redes
+
+---
+
+## 📚 Documentação Adicional
+
+- 📖 [Backend README](./backend/README.md) - Documentação detalhada do backend
+- 📖 [Decisões Técnicas](./DECISOES_TECNICAS.md) - Justificativas e trade-offs
+- 📖 [Plano de Implementação](./PLANO_IMPLEMENTACAO.md) - Roadmap e checklist
+- 📖 [Docker Setup](./DOCKER_SETUP.md) - Guia completo de Docker
+- 📖 [Testing Guide](./TESTING.md) - Guia de testes
+- 📖 [Infrastructure](./infrastructure/README.md) - Documentação de infra
+
+---
+
+## 🛠️ Scripts Disponíveis
+
+### Backend
+
+```bash
+yarn start:dev      # Desenvolvimento com hot reload
+yarn start:prod     # Produção
+yarn build          # Build
+yarn test           # Testes unitários
+yarn test:watch     # Testes em watch mode
+yarn test:cov       # Cobertura de testes
+yarn test:e2e       # Testes E2E
+yarn lint           # ESLint
+yarn format         # Prettier
+yarn prisma:studio  # Prisma Studio (UI do banco)
+yarn seed           # Seed do banco
+```
+
+### Frontend
+
+```bash
+yarn dev            # Desenvolvimento
+yarn build          # Build de produção
+yarn start          # Servidor de produção
+yarn test           # Testes
+yarn test:watch     # Testes em watch mode
+yarn lint           # ESLint
+yarn format         # Prettier
+```
+
+---
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: add amazing feature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+### Padrão de Commits
+
+Seguimos o [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+tipo(escopo): descrição
+
+feat: nova funcionalidade
+fix: correção de bug
+docs: documentação
+test: testes
+chore: tarefas de build, configs
+refactor: refatoração
+style: formatação
+perf: performance
+ci: CI/CD
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Backend não inicia
+
+```bash
+# Verificar logs
+docker compose logs backend
+
+# Executar migrations manualmente
+docker compose exec backend npx prisma migrate deploy
+
+# Executar seed
+docker compose exec backend yarn seed
+```
+
+### Frontend não conecta no Backend
+
+```bash
+# Verificar variável de ambiente
+cat frontend/.env
+# Deve ser: NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# Verificar se backend está rodando
+curl http://localhost:3000/api-docs
+```
+
+### RabbitMQ não fica healthy
+
+```bash
+# Ver logs
+docker compose logs rabbitmq
+
+# Aguardar até ver: "Server startup complete"
+# Pode demorar até 40 segundos na primeira vez
+```
+
+### Porta já em uso
+
+```bash
+# Mudar portas no .env
+# backend/.env
+PORT=3010
+
+# Restart
+docker compose down
+docker compose up -d
+```
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido como parte de um teste técnico para a Bankme.
+
+---
+
+<div align="center">
+
+**Desenvolvido por Alessandro Albergaria Filho**
+
+[⬆ Voltar ao topo](#-aprove-me---sistema-de-gerenciamento-de-recebíveis)
+
+</div>

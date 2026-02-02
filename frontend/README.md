@@ -21,15 +21,15 @@ Interface web moderna desenvolvida com Next.js para consumir a API Aprove-me. Pe
 
 ## 🛠️ Stack Tecnológica
 
-| Tecnologia | Versão | Propósito |
-|------------|--------|-----------|
-| **Next.js** | 16.x | Framework React com App Router |
-| **TypeScript** | 5.x | Tipagem estática |
-| **Tailwind CSS** | 4.x | Estilização utility-first |
-| **React Hook Form** | - | Gerenciamento de formulários |
-| **Zod** | - | Validação de schemas |
-| **Axios** | - | Cliente HTTP |
-| **Jest** | - | Framework de testes |
+| Tecnologia          | Versão | Propósito                      |
+| ------------------- | ------ | ------------------------------ |
+| **Next.js**         | 16.x   | Framework React com App Router |
+| **TypeScript**      | 5.x    | Tipagem estática               |
+| **Tailwind CSS**    | 4.x    | Estilização utility-first      |
+| **React Hook Form** | -      | Gerenciamento de formulários   |
+| **Zod**             | -      | Validação de schemas           |
+| **Axios**           | -      | Cliente HTTP                   |
+| **Jest**            | -      | Framework de testes            |
 
 ## 📦 Pré-requisitos
 
@@ -143,16 +143,16 @@ A aplicação consome a API backend em `http://localhost:3000`:
 
 ### Endpoints Utilizados
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `POST` | `/integrations/auth` | Login |
-| `POST` | `/integrations/payable` | Criar payable |
-| `GET` | `/integrations/payable/:id` | Buscar payable |
-| `PUT` | `/integrations/payable/:id` | Atualizar payable |
-| `DELETE` | `/integrations/payable/:id` | Excluir payable |
-| `GET` | `/integrations/assignor/:id` | Buscar assignor |
-| `PUT` | `/integrations/assignor/:id` | Atualizar assignor |
-| `DELETE` | `/integrations/assignor/:id` | Excluir assignor |
+| Método   | Endpoint                     | Descrição          |
+| -------- | ---------------------------- | ------------------ |
+| `POST`   | `/integrations/auth`         | Login              |
+| `POST`   | `/integrations/payable`      | Criar payable      |
+| `GET`    | `/integrations/payable/:id`  | Buscar payable     |
+| `PUT`    | `/integrations/payable/:id`  | Atualizar payable  |
+| `DELETE` | `/integrations/payable/:id`  | Excluir payable    |
+| `GET`    | `/integrations/assignor/:id` | Buscar assignor    |
+| `PUT`    | `/integrations/assignor/:id` | Atualizar assignor |
+| `DELETE` | `/integrations/assignor/:id` | Excluir assignor   |
 
 ## 🧪 Testes
 
@@ -186,5 +186,3 @@ Este é um projeto de desafio técnico. Para contribuir:
 5. Abra um Pull Request
 
 ---
-
-**Desenvolvido com ❤️ para o desafio técnico Bankme**

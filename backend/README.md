@@ -22,20 +22,20 @@ API Backend desenvolvida com NestJS para gerenciamento de recebíveis (payables)
 
 ## 🛠️ Stack Tecnológica
 
-| Tecnologia | Versão | Propósito |
-|------------|--------|-----------|
-| **Node.js** | 18+ | Runtime JavaScript |
-| **NestJS** | 11.x | Framework backend |
-| **TypeScript** | 5.x | Tipagem estática |
-| **Prisma** | 7.x | ORM para banco de dados |
-| **SQLite** | 3.x | Banco de dados |
-| **JWT** | - | Autenticação |
-| **Passport** | - | Estratégias de autenticação |
-| **bcrypt** | 6.x | Hash de senhas |
-| **class-validator** | - | Validação de DTOs |
-| **class-transformer** | - | Transformação de dados |
-| **Jest** | 29.x | Framework de testes |
-| **Swagger** | 11.x | Documentação da API |
+| Tecnologia            | Versão | Propósito                   |
+| --------------------- | ------ | --------------------------- |
+| **Node.js**           | 18+    | Runtime JavaScript          |
+| **NestJS**            | 11.x   | Framework backend           |
+| **TypeScript**        | 5.x    | Tipagem estática            |
+| **Prisma**            | 7.x    | ORM para banco de dados     |
+| **SQLite**            | 3.x    | Banco de dados              |
+| **JWT**               | -      | Autenticação                |
+| **Passport**          | -      | Estratégias de autenticação |
+| **bcrypt**            | 6.x    | Hash de senhas              |
+| **class-validator**   | -      | Validação de DTOs           |
+| **class-transformer** | -      | Transformação de dados      |
+| **Jest**              | 29.x   | Framework de testes         |
+| **Swagger**           | 11.x   | Documentação da API         |
 
 ## 📦 Pré-requisitos
 
@@ -226,26 +226,26 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Autenticação
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|--------------|
-| `POST` | `/integrations/auth` | Login e geração de JWT | ❌ Pública |
+| Método | Endpoint             | Descrição              | Autenticação |
+| ------ | -------------------- | ---------------------- | ------------ |
+| `POST` | `/integrations/auth` | Login e geração de JWT | ❌ Pública   |
 
 ### Recebíveis (Payables)
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|--------------|
-| `POST` | `/integrations/payable` | Criar recebível + cedente | ✅ JWT |
-| `GET` | `/integrations/payable/:id` | Buscar recebível por ID | ✅ JWT |
-| `PUT` | `/integrations/payable/:id` | Atualizar recebível | ✅ JWT |
-| `DELETE` | `/integrations/payable/:id` | Excluir recebível | ✅ JWT |
+| Método   | Endpoint                    | Descrição                 | Autenticação |
+| -------- | --------------------------- | ------------------------- | ------------ |
+| `POST`   | `/integrations/payable`     | Criar recebível + cedente | ✅ JWT       |
+| `GET`    | `/integrations/payable/:id` | Buscar recebível por ID   | ✅ JWT       |
+| `PUT`    | `/integrations/payable/:id` | Atualizar recebível       | ✅ JWT       |
+| `DELETE` | `/integrations/payable/:id` | Excluir recebível         | ✅ JWT       |
 
 ### Cedentes (Assignors)
 
-| Método | Endpoint | Descrição | Autenticação |
-|--------|----------|-----------|--------------|
-| `GET` | `/integrations/assignor/:id` | Buscar cedente por ID | ✅ JWT |
-| `PUT` | `/integrations/assignor/:id` | Atualizar cedente | ✅ JWT |
-| `DELETE` | `/integrations/assignor/:id` | Excluir cedente | ✅ JWT |
+| Método   | Endpoint                     | Descrição             | Autenticação |
+| -------- | ---------------------------- | --------------------- | ------------ |
+| `GET`    | `/integrations/assignor/:id` | Buscar cedente por ID | ✅ JWT       |
+| `PUT`    | `/integrations/assignor/:id` | Atualizar cedente     | ✅ JWT       |
+| `DELETE` | `/integrations/assignor/:id` | Excluir cedente       | ✅ JWT       |
 
 ## 📝 Exemplos de Requisições
 
@@ -370,12 +370,12 @@ backend/
 
 ```typescript
 {
-  id: string           // UUID v4
-  value: number        // Valor em reais (positivo)
-  emissionDate: Date   // Data de emissão
-  assignorId: string   // ID do cedente (FK)
-  createdAt: Date      // Data de criação
-  updatedAt: Date      // Data de atualização
+  id: string; // UUID v4
+  value: number; // Valor em reais (positivo)
+  emissionDate: Date; // Data de emissão
+  assignorId: string; // ID do cedente (FK)
+  createdAt: Date; // Data de criação
+  updatedAt: Date; // Data de atualização
 }
 ```
 
@@ -383,13 +383,13 @@ backend/
 
 ```typescript
 {
-  id: string           // UUID v4
-  document: string     // CPF/CNPJ (único, max 30 chars)
-  email: string        // Email (max 140 chars)
-  phone: string        // Telefone (max 20 chars)
-  name: string         // Nome/Razão Social (max 140 chars)
-  createdAt: Date      // Data de criação
-  updatedAt: Date      // Data de atualização
+  id: string; // UUID v4
+  document: string; // CPF/CNPJ (único, max 30 chars)
+  email: string; // Email (max 140 chars)
+  phone: string; // Telefone (max 20 chars)
+  name: string; // Nome/Razão Social (max 140 chars)
+  createdAt: Date; // Data de criação
+  updatedAt: Date; // Data de atualização
 }
 ```
 
@@ -397,11 +397,11 @@ backend/
 
 ```typescript
 {
-  id: string           // UUID v4
-  login: string        // Login único
-  password: string     // Hash bcrypt
-  createdAt: Date      // Data de criação
-  updatedAt: Date      // Data de atualização
+  id: string; // UUID v4
+  login: string; // Login único
+  password: string; // Hash bcrypt
+  createdAt: Date; // Data de criação
+  updatedAt: Date; // Data de atualização
 }
 ```
 
@@ -444,23 +444,27 @@ Para rodar **toda a infraestrutura localmente** (PostgreSQL, Redis, RabbitMQ, Ba
 ```
 
 Isso irá subir:
+
 - ✅ **PostgreSQL** (porta 5432) - Simula Cloud SQL
 - ✅ **Redis** (porta 6379) - Simula Cloud Memorystore
 - ✅ **RabbitMQ** (portas 5672, 15672) - Simula Cloud Pub/Sub
 - ✅ **Backend** (porta 3000) - Simula Cloud Run
 
 **Acessar serviços:**
+
 - Backend API: http://localhost:3000
 - Swagger UI: http://localhost:3000/api
 - RabbitMQ Management: http://localhost:15672 (admin/admin)
 
 **Ver logs:**
+
 ```bash
 ./scripts/logs.sh          # Todos os serviços
 ./scripts/logs.sh backend  # Apenas backend
 ```
 
 **Parar infraestrutura:**
+
 ```bash
 ./scripts/stop-local.sh
 ```
@@ -514,6 +518,7 @@ terraform plan
 ### Mensagens de Erro
 
 Todas as validações retornam mensagens descritivas indicando:
+
 - Qual campo está inválido
 - Qual o problema encontrado
 - Como corrigir (quando aplicável)
@@ -522,13 +527,13 @@ Todas as validações retornam mensagens descritivas indicando:
 
 A API retorna erros padronizados com os seguintes status codes:
 
-| Status | Descrição | Exemplo |
-|--------|-----------|---------|
-| `400` | Bad Request | Dados inválidos, validação falhou |
-| `401` | Unauthorized | Token JWT inválido ou expirado |
-| `404` | Not Found | Recurso não encontrado |
-| `409` | Conflict | Documento de cedente duplicado |
-| `500` | Internal Server Error | Erro interno do servidor |
+| Status | Descrição             | Exemplo                           |
+| ------ | --------------------- | --------------------------------- |
+| `400`  | Bad Request           | Dados inválidos, validação falhou |
+| `401`  | Unauthorized          | Token JWT inválido ou expirado    |
+| `404`  | Not Found             | Recurso não encontrado            |
+| `409`  | Conflict              | Documento de cedente duplicado    |
+| `500`  | Internal Server Error | Erro interno do servidor          |
 
 **Formato de Erro:**
 
@@ -601,5 +606,3 @@ Este é um projeto de desafio técnico, mas sugestões são bem-vindas!
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
-
-**Desenvolvido com ❤️ para o desafio técnico Bankme**
