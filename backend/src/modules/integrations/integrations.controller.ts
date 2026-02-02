@@ -29,6 +29,7 @@ import { AssignorService } from '../assignor/assignor.service';
 import { UpdatePayableDto } from '../payable/dto';
 import { UpdateAssignorDto } from '../assignor/dto';
 import { UuidParamDto } from '../../common/dto';
+import { QueueService } from '../../queue/queue.service';
 
 @ApiTags('integrations')
 @ApiBearerAuth('JWT-auth')
@@ -38,6 +39,7 @@ export class IntegrationsController {
     private readonly integrationsService: IntegrationsService,
     private readonly payableService: PayableService,
     private readonly assignorService: AssignorService,
+    private readonly queueService: QueueService,
   ) {}
 
   @Post('payable')
@@ -97,6 +99,45 @@ export class IntegrationsController {
     @Body() createBatchDto: CreateBatchPayableDto,
   ): Promise<BatchResponseDto> {
     return this.integrationsService.createBatchPayables(createBatchDto);
+  }
+
+  @Get('payable/batch/dlq')
+  @ApiOperation({
+    summary: 'Consultar Dead Letter Queue',
+    description:
+      'Lista os payables que falharam após 4 tentativas de processamento',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de mensagens na DLQ',
+    schema: {
+      type: 'object',
+      properties: {
+        count: { type: 'number', example: 5 },
+        messages: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              content: { type: 'object' },
+              headers: { type: 'object' },
+              timestamp: { type: 'number' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  async getDLQMessages() {
+    const messages = await this.queueService.getDLQMessages(100);
+    return {
+      count: messages.length,
+      messages,
+    };
   }
 
   @Get('payable/:id')

@@ -111,14 +111,19 @@ export class PayableBatchProcessor implements OnModuleInit {
 
               this.channel?.nack(msg, false, false);
             } else {
-              this.logger.log(`Retrying message (attempt ${retryCount}/4)`);
+              const delayMs = Math.pow(2, retryCount - 1) * 1000;
+              this.logger.log(
+                `Retrying message (attempt ${retryCount}/4) after ${delayMs}ms`,
+              );
 
               if (this.channel) {
                 await this.channel.sendToQueue(queueName, msg.content, {
                   headers: {
                     ...msg.properties.headers,
                     'x-retry-count': retryCount,
+                    'x-delay': delayMs,
                   },
+                  expiration: delayMs.toString(),
                 });
               }
 

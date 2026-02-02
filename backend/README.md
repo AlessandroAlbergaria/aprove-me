@@ -432,35 +432,67 @@ npx prisma studio       # Interface visual do banco
 npx prisma migrate dev  # Criar nova migration
 ```
 
-## 🐳 Docker
+## 🐳 Docker e Infraestrutura Local
 
-### Build da Imagem
+### 🏠 Infraestrutura Completa (Recomendado)
+
+Para rodar **toda a infraestrutura localmente** (PostgreSQL, Redis, RabbitMQ, Backend):
+
+```bash
+# Da raiz do projeto
+./scripts/start-local.sh
+```
+
+Isso irá subir:
+- ✅ **PostgreSQL** (porta 5432) - Simula Cloud SQL
+- ✅ **Redis** (porta 6379) - Simula Cloud Memorystore
+- ✅ **RabbitMQ** (portas 5672, 15672) - Simula Cloud Pub/Sub
+- ✅ **Backend** (porta 3000) - Simula Cloud Run
+
+**Acessar serviços:**
+- Backend API: http://localhost:3000
+- Swagger UI: http://localhost:3000/api
+- RabbitMQ Management: http://localhost:15672 (admin/admin)
+
+**Ver logs:**
+```bash
+./scripts/logs.sh          # Todos os serviços
+./scripts/logs.sh backend  # Apenas backend
+```
+
+**Parar infraestrutura:**
+```bash
+./scripts/stop-local.sh
+```
+
+📚 **Documentação completa:** `infrastructure/local/README.md`
+
+### 🔧 Build da Imagem (Standalone)
 
 ```bash
 docker build -t aprove-me-backend .
 ```
 
-### Executar Container
+### 🚀 Executar Container (Standalone)
 
 ```bash
 docker run -p 3000:3000 \
-  -e DATABASE_URL="file:./dev.db" \
+  -e DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/aprove-me" \
   -e JWT_SECRET="your-secret-key" \
   aprove-me-backend
 ```
 
-### Docker Compose
+### ☁️ Infraestrutura GCP (Futuro)
+
+O projeto está preparado para deploy no GCP com Terraform:
 
 ```bash
-# Iniciar serviços
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f backend
-
-# Parar serviços
-docker-compose down
+cd infrastructure/terraform
+terraform init
+terraform plan
 ```
+
+📚 **Documentação Terraform:** `infrastructure/terraform/README.md`
 
 ## 🔍 Validações Implementadas
 

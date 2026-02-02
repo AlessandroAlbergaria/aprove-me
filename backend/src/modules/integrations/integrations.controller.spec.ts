@@ -3,6 +3,7 @@ import { IntegrationsController } from './integrations.controller';
 import { IntegrationsService } from './integrations.service';
 import { PayableService } from '../payable/payable.service';
 import { AssignorService } from '../assignor/assignor.service';
+import { QueueService } from '../../queue/queue.service';
 import { createMockPayable, createMockAssignor } from '../../test/factories';
 
 describe('IntegrationsController', () => {
@@ -25,6 +26,10 @@ describe('IntegrationsController', () => {
     delete: jest.fn(),
   };
 
+  const mockQueueService = {
+    getDLQMessages: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [IntegrationsController],
@@ -40,6 +45,10 @@ describe('IntegrationsController', () => {
         {
           provide: AssignorService,
           useValue: mockAssignorService,
+        },
+        {
+          provide: QueueService,
+          useValue: mockQueueService,
         },
       ],
     }).compile();
@@ -228,6 +237,39 @@ describe('IntegrationsController', () => {
       expect(mockIntegrationsService.createBatchPayables).toHaveBeenCalledWith(
         createBatchDto,
       );
+    });
+  });
+
+  describe('getDLQMessages', () => {
+    it('should return DLQ messages successfully', async () => {
+      const mockMessages = [
+        {
+          content: { batchId: 'test-123', payables: [] },
+          headers: { 'x-retry-count': 4 },
+          timestamp: Date.now(),
+        },
+      ];
+
+      mockQueueService.getDLQMessages.mockResolvedValue(mockMessages);
+
+      const result = await controller.getDLQMessages();
+
+      expect(result).toEqual({
+        count: 1,
+        messages: mockMessages,
+      });
+      expect(mockQueueService.getDLQMessages).toHaveBeenCalledWith(100);
+    });
+
+    it('should return empty list when no messages in DLQ', async () => {
+      mockQueueService.getDLQMessages.mockResolvedValue([]);
+
+      const result = await controller.getDLQMessages();
+
+      expect(result).toEqual({
+        count: 0,
+        messages: [],
+      });
     });
   });
 });

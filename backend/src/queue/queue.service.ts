@@ -99,6 +99,44 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async getDLQMessages(limit: number = 100): Promise<unknown[]> {
+    try {
+      if (!this.channel) {
+        return [];
+      }
+
+      const dlqName = process.env.RABBITMQ_DLQ as string;
+      const messages: unknown[] = [];
+
+      for (let i = 0; i < limit; i++) {
+        const msg = await this.channel.get(dlqName, { noAck: false });
+
+        if (!msg) {
+          break;
+        }
+
+        try {
+          const content = JSON.parse(msg.content.toString());
+          messages.push({
+            content,
+            headers: msg.properties.headers,
+            timestamp: msg.properties.timestamp,
+          });
+
+          this.channel.nack(msg, false, true);
+        } catch (parseError) {
+          this.logger.error('Failed to parse DLQ message', parseError);
+          this.channel.nack(msg, false, true);
+        }
+      }
+
+      return messages;
+    } catch (error) {
+      this.logger.error('Failed to get DLQ messages', error);
+      return [];
+    }
+  }
+
   async onModuleDestroy() {
     try {
       await this.channel?.close();

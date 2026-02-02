@@ -1,0 +1,184 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aprove-me-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aprove-me}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+      TZ: America/Sao_Paulo
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-aprove-me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - aprove-me-network
+    labels:
+      com.aprove-me.service: "database"
+      com.aprove-me.simulates: "Cloud SQL"
+
+  redis:
+    image: redis:7-alpine
+    container_name: aprove-me-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - aprove-me-network
+    labels:
+      com.aprove-me.service: "cache"
+      com.aprove-me.simulates: "Cloud Memorystore"
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: aprove-me-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
+      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 512MB
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - aprove-me-network
+    labels:
+      com.aprove-me.service: "queue"
+      com.aprove-me.simulates: "Cloud Pub/Sub"
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: aprove-me-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${BACKEND_PORT:-3000}
+      
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-aprove-me}?schema=public
+      
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin}@rabbitmq:5672
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-payable-batch}
+      RABBITMQ_DLQ: ${RABBITMQ_DLQ:-payable-batch-dlq}
+      
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      
+      SMTP_HOST: ${SMTP_HOST:-smtp.mailtrap.io}
+      SMTP_PORT: ${SMTP_PORT:-2525}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM:-"Aprove-me System <noreply@aprove-me.com>"}
+      EMAIL_TO_OPS: ${EMAIL_TO_OPS:-ops@aprove-me.com}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ../../backend/src:/app/src:ro
+      - ../../backend/prisma:/app/prisma:ro
+      - backend_node_modules:/app/node_modules
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - aprove-me-network
+    labels:
+      com.aprove-me.service: "api"
+      com.aprove-me.simulates: "Cloud Run"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: aprove-me-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@aprove-me.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - aprove-me-network
+    labels:
+      com.aprove-me.service: "database-admin"
+      com.aprove-me.optional: "true"
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+    labels:
+      com.aprove-me.volume: "database"
+  
+  redis_data:
+    driver: local
+    labels:
+      com.aprove-me.volume: "cache"
+  
+  rabbitmq_data:
+    driver: local
+    labels:
+      com.aprove-me.volume: "queue"
+  
+  backend_node_modules:
+    driver: local
+    labels:
+      com.aprove-me.volume: "dependencies"
+  
+  pgadmin_data:
+    driver: local
+    labels:
+      com.aprove-me.volume: "tools"
+
+networks:
+  aprove-me-network:
+    driver: bridge
+    labels:
+      com.aprove-me.network: "main"

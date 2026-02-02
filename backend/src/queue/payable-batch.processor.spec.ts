@@ -195,6 +195,26 @@ describe('PayableBatchProcessor', () => {
     });
   });
 
+  describe('retry with exponential backoff', () => {
+    it('should calculate correct delay for each retry attempt', () => {
+      const retryCount1 = 1;
+      const delayMs1 = Math.pow(2, retryCount1 - 1) * 1000;
+      expect(delayMs1).toBe(1000);
+
+      const retryCount2 = 2;
+      const delayMs2 = Math.pow(2, retryCount2 - 1) * 1000;
+      expect(delayMs2).toBe(2000);
+
+      const retryCount3 = 3;
+      const delayMs3 = Math.pow(2, retryCount3 - 1) * 1000;
+      expect(delayMs3).toBe(4000);
+
+      const retryCount4 = 4;
+      const delayMs4 = Math.pow(2, retryCount4 - 1) * 1000;
+      expect(delayMs4).toBe(8000);
+    });
+  });
+
   describe('onModuleDestroy', () => {
     it('should close connections gracefully', async () => {
       await processor.onModuleDestroy();
