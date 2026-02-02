@@ -1,16 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input, Button, Card, Alert } from '@/components/ui';
 import { loginSchema, type LoginFormData } from '@/lib/schemas';
-import { authService } from '@/lib/api';
+import { useAuth } from '@/contexts';
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,11 +26,7 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(null);
 
-      const response = await authService.login(data);
-
-      if (response.access_token) {
-        router.push('/payables');
-      }
+      await login(data);
     } catch (err: any) {
       const errorMessage =
         err.message || 'Erro ao fazer login. Verifique suas credenciais.';
