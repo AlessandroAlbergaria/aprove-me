@@ -18,7 +18,12 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { IntegrationsService } from './integrations.service';
-import { CreateIntegrationDto, IntegrationResponseDto } from './dto';
+import {
+  CreateIntegrationDto,
+  IntegrationResponseDto,
+  CreateBatchPayableDto,
+  BatchResponseDto,
+} from './dto';
 import { PayableService } from '../payable/payable.service';
 import { AssignorService } from '../assignor/assignor.service';
 import { UpdatePayableDto } from '../payable/dto';
@@ -65,6 +70,33 @@ export class IntegrationsController {
     return this.integrationsService.createPayableWithAssignor(
       createIntegrationDto,
     );
+  }
+
+  @Post('payable/batch')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Criar lote de recebíveis',
+    description:
+      'Recebe um lote de até 10.000 recebíveis para processamento assíncrono via fila',
+  })
+  @ApiBody({ type: CreateBatchPayableDto })
+  @ApiResponse({
+    status: 202,
+    description: 'Lote aceito e adicionado à fila para processamento',
+    type: BatchResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou lote excede 10.000 itens',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado - Token JWT inválido ou expirado',
+  })
+  async createBatchPayables(
+    @Body() createBatchDto: CreateBatchPayableDto,
+  ): Promise<BatchResponseDto> {
+    return this.integrationsService.createBatchPayables(createBatchDto);
   }
 
   @Get('payable/:id')

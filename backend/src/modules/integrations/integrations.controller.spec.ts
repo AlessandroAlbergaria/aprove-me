@@ -10,6 +10,7 @@ describe('IntegrationsController', () => {
 
   const mockIntegrationsService = {
     createPayableWithAssignor: jest.fn(),
+    createBatchPayables: jest.fn(),
   };
 
   const mockPayableService = {
@@ -186,6 +187,47 @@ describe('IntegrationsController', () => {
       await controller.deleteAssignor({ id: mockAssignor.id });
 
       expect(mockAssignorService.delete).toHaveBeenCalledWith(mockAssignor.id);
+    });
+  });
+
+  describe('createBatchPayables', () => {
+    it('should create batch payables successfully', async () => {
+      const mockPayable = createMockPayable();
+      const createBatchDto = {
+        payables: [
+          {
+            id: mockPayable.id,
+            value: mockPayable.value,
+            emissionDate: mockPayable.emissionDate.toISOString(),
+            assignor: mockPayable.assignorId,
+          },
+          {
+            id: 'batch-payable-2',
+            value: 2000,
+            emissionDate: '2024-01-16',
+            assignor: mockPayable.assignorId,
+          },
+        ],
+      };
+
+      const expectedResponse = {
+        batchId: 'batch-123',
+        totalPayables: 2,
+        status: 'queued',
+        message: 'Lote recebido e adicionado à fila para processamento',
+        createdAt: new Date(),
+      };
+
+      mockIntegrationsService.createBatchPayables.mockResolvedValue(
+        expectedResponse,
+      );
+
+      const result = await controller.createBatchPayables(createBatchDto);
+
+      expect(result).toEqual(expectedResponse);
+      expect(mockIntegrationsService.createBatchPayables).toHaveBeenCalledWith(
+        createBatchDto,
+      );
     });
   });
 });
