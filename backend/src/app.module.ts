@@ -9,6 +9,7 @@ import { PayableModule } from './modules/payable/payable.module';
 import { AssignorModule } from './modules/assignor/assignor.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { QueueModule } from './queue';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './modules/users/users.module';
       load: [configuration],
     }),
     PrismaModule,
+    QueueModule,
     AuthModule,
     UsersModule,
     IntegrationsModule,

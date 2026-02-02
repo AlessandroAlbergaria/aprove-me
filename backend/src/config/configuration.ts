@@ -7,4 +7,9 @@ export default () => ({
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRATION,
   },
+  rabbitmq: {
+    url: process.env.RABBITMQ_URL,
+    queue: process.env.RABBITMQ_QUEUE,
+    dlq: process.env.RABBITMQ_DLQ,
+  },
 });

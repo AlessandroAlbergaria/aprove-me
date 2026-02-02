@@ -1,6 +1,27 @@
 version: "3.8"
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: aprove-me-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./backend/.env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -16,13 +37,27 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION:-60s}
       - PORT=${PORT:-3000}
       - NODE_ENV=${NODE_ENV:-production}
+      - RABBITMQ_URL=${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE:-payable-batch}
+      - RABBITMQ_DLQ=${RABBITMQ_DLQ:-payable-batch-dlq}
     volumes:
       - ./backend/prisma:/app/prisma
       - backend-data:/app/prisma
     command: sh -c "npx prisma migrate deploy && npx prisma db seed && yarn start:prod"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${PORT:-3000}"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${PORT:-3000}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,4 +65,6 @@ services:
 
 volumes:
   backend-data:
+    driver: local
+  rabbitmq-data:
     driver: local
