@@ -8,11 +8,7 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    let databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
-
-    if (databaseUrl.startsWith('file:./') && !databaseUrl.includes('prisma/')) {
-      databaseUrl = 'file:./prisma/' + databaseUrl.substring(7);
-    }
+    const databaseUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
 
     const adapter = new PrismaLibSql({
       url: databaseUrl,
