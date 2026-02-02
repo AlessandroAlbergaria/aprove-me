@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout';
 import { AssignorForm } from '@/components/forms';
+import { PrivateRoute } from '@/components/auth';
 import { AssignorFormData } from '@/lib/schemas';
 import { assignorsService } from '@/lib/api';
 
@@ -27,17 +28,19 @@ export default function NewAssignorPage() {
   };
 
   return (
-    <MainLayout title="Aprove-me">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Novo Cedente</h1>
-          <p className="mt-2 text-gray-600">
-            Preencha os dados abaixo para cadastrar um novo cedente
-          </p>
-        </div>
+    <PrivateRoute>
+      <MainLayout title="Aprove-me">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Novo Cedente</h1>
+            <p className="mt-2 text-gray-600">
+              Preencha os dados abaixo para cadastrar um novo cedente
+            </p>
+          </div>
 
-        <AssignorForm onSubmit={handleSubmit} onSuccess={handleSuccess} />
-      </div>
-    </MainLayout>
+          <AssignorForm onSubmit={handleSubmit} onSuccess={handleSuccess} />
+        </div>
+      </MainLayout>
+    </PrivateRoute>
   );
 }

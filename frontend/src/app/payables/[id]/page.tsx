@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout';
 import { Card, Button, Alert } from '@/components/ui';
+import { PrivateRoute } from '@/components/auth';
 import { payablesService } from '@/lib/api';
 import type { Payable } from '@/types';
 
@@ -81,16 +82,17 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
   }
 
   return (
-    <MainLayout title="Aprove-me">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Detalhes do Recebível
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Informações completas do recebível cadastrado
-          </p>
-        </div>
+    <PrivateRoute>
+      <MainLayout title="Aprove-me">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Detalhes do Recebível
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Informações completas do recebível cadastrado
+            </p>
+          </div>
 
         <Card
           title="Recebível Cadastrado"
@@ -166,5 +168,6 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
 
       </div>
     </MainLayout>
+    </PrivateRoute>
   );
 }

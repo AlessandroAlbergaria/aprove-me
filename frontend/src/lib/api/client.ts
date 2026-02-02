@@ -37,7 +37,11 @@ apiClient.interceptors.response.use(
       const data = error.response.data as any;
 
       if (status === 401) {
-        console.error('Unauthorized');
+        Cookies.remove(TOKEN_KEY);
+        
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
 
       if (status === 404) {

@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout';
 import { PayableForm } from '@/components/forms';
+import { PrivateRoute } from '@/components/auth';
 import { PayableFormData } from '@/lib/schemas';
 import { payablesService } from '@/lib/api';
 
@@ -26,17 +27,19 @@ export default function NewPayablePage() {
   };
 
   return (
-    <MainLayout title="Aprove-me">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Novo Recebível</h1>
-          <p className="mt-2 text-gray-600">
-            Preencha os dados abaixo para cadastrar um novo recebível
-          </p>
-        </div>
+    <PrivateRoute>
+      <MainLayout title="Aprove-me">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Novo Recebível</h1>
+            <p className="mt-2 text-gray-600">
+              Preencha os dados abaixo para cadastrar um novo recebível
+            </p>
+          </div>
 
-        <PayableForm onSubmit={handleSubmit} onSuccess={handleSuccess} />
-      </div>
-    </MainLayout>
+          <PayableForm onSubmit={handleSubmit} onSuccess={handleSuccess} />
+        </div>
+      </MainLayout>
+    </PrivateRoute>
   );
 }
