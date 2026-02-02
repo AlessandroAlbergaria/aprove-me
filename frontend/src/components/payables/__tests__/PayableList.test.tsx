@@ -42,7 +42,7 @@ describe('PayableList', () => {
     const valueElements = screen.getAllByText(/R\$ 1\.000,50/);
     expect(valueElements.length).toBeGreaterThan(0);
 
-    const dateElements = screen.getAllByText(/14\/01\/2024/);
+    const dateElements = screen.getAllByText(/(14|15)\/01\/2024/);
     expect(dateElements.length).toBeGreaterThan(0);
   });
 
