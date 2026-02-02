@@ -11,9 +11,7 @@ export default function NewPayablePage() {
 
   const handleSubmit = async (data: PayableFormData) => {
     console.log('Payable data:', data);
-    
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
     return Promise.resolve();
   };
 
@@ -27,9 +25,7 @@ export default function NewPayablePage() {
     <MainLayout title="Aprove-me">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Novo Recebível
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Novo Recebível</h1>
           <p className="mt-2 text-gray-600">
             Preencha os dados abaixo para cadastrar um novo recebível
           </p>

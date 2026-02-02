@@ -38,9 +38,7 @@ export const PayableForm: React.FC<PayableFormProps> = ({
       setIsLoading(true);
       setError(null);
       setSuccess(false);
-
       await onSubmit(data);
-
       setSuccess(true);
       reset();
       onSuccess?.(data);
