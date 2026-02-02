@@ -7,6 +7,7 @@ import { PrismaModule } from './database';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { PayableModule } from './modules/payable/payable.module';
 import { AssignorModule } from './modules/assignor/assignor.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AssignorModule } from './modules/assignor/assignor.module';
       load: [configuration],
     }),
     PrismaModule,
+    AuthModule,
     IntegrationsModule,
     PayableModule,
     AssignorModule,
