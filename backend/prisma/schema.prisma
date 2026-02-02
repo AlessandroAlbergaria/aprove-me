@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Assignor {
+  id        String    @id
+  document  String    @unique
+  email     String
+  phone     String
+  name      String
+  payables  Payable[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("assignors")
+}
+
+model Payable {
+  id           String   @id
+  value        Float
+  emissionDate DateTime
+  assignorId   String
+  assignor     Assignor @relation(fields: [assignorId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("payables")
+}
