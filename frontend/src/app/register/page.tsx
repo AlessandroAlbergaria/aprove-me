@@ -39,9 +39,11 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-    } catch (err: any) {
+    } catch (err) {
       const errorMessage =
-        err.message || 'Erro ao cadastrar usuário. Tente novamente.';
+        err instanceof Error
+          ? err.message
+          : 'Erro ao cadastrar usuário. Tente novamente.';
       setError(errorMessage);
     } finally {
       setIsLoading(false);

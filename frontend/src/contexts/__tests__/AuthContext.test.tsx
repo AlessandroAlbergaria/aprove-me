@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { AuthProvider, useAuth } from '../AuthContext';

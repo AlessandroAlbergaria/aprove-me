@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import LoginPage from '../page';
-import { authService } from '@/lib/api';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),

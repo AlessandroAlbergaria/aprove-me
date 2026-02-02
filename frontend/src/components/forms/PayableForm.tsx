@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { Input, Button, Card, Alert } from '@/components/ui';
 import { payableSchema, type PayableFormData } from '@/lib/schemas';
 import { assignorsService } from '@/lib/api';
@@ -151,9 +152,12 @@ export const PayableForm: React.FC<PayableFormProps> = ({
           {!loadingAssignors && assignors.length === 0 && (
             <p className="mt-1 text-sm text-gray-500">
               Nenhum cedente cadastrado.{' '}
-              <a href="/assignors/new" className="text-blue-600 hover:underline">
+              <Link
+                href="/assignors/new"
+                className="text-blue-600 hover:underline"
+              >
                 Cadastre um cedente primeiro
-              </a>
+              </Link>
             </p>
           )}
           {!errors.assignor && assignors.length > 0 && (

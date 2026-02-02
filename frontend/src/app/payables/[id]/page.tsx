@@ -25,8 +25,10 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
         setLoading(true);
         const data = await payablesService.getById(params.id);
         setPayable(data);
-      } catch (err: any) {
-        setError(err.message || 'Erro ao carregar recebível');
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Erro ao carregar recebível',
+        );
       } finally {
         setLoading(false);
       }

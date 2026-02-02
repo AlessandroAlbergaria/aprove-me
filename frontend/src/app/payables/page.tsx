@@ -35,8 +35,10 @@ export default function PayablesPage() {
       
       setPayables(paginatedData);
       setTotalPages(Math.ceil(data.length / itemsPerPage));
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar recebíveis');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Erro ao carregar recebíveis',
+      );
     } finally {
       setLoading(false);
     }
@@ -58,8 +60,10 @@ export default function PayablesPage() {
     try {
       await payablesService.delete(id);
       fetchPayables();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao excluir recebível');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Erro ao excluir recebível',
+      );
     }
   };
 

@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response) {
       const status = error.response.status;
-      const data = error.response.data as any;
+      const data = error.response.data as Record<string, unknown>;
 
       if (status === 401) {
         Cookies.remove(TOKEN_KEY);

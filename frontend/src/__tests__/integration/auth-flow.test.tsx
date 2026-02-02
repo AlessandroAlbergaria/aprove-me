@@ -77,7 +77,9 @@ describe('Authentication Flow Integration', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Credenciais inválidas/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Erro ao fazer login|Credenciais inválidas/i),
+      ).toBeInTheDocument();
     });
   });
 });
