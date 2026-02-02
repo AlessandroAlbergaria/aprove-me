@@ -15,6 +15,7 @@ import { PayableService } from '../payable/payable.service';
 import { AssignorService } from '../assignor/assignor.service';
 import { UpdatePayableDto } from '../payable/dto';
 import { UpdateAssignorDto } from '../assignor/dto';
+import { UuidParamDto } from '../../common/dto';
 
 @Controller('integrations')
 export class IntegrationsController {
@@ -35,40 +36,40 @@ export class IntegrationsController {
   }
 
   @Get('payable/:id')
-  async getPayable(@Param('id') id: string) {
-    return this.payableService.findById(id);
+  async getPayable(@Param() params: UuidParamDto) {
+    return this.payableService.findById(params.id);
   }
 
   @Get('assignor/:id')
-  async getAssignor(@Param('id') id: string) {
-    return this.assignorService.findById(id);
+  async getAssignor(@Param() params: UuidParamDto) {
+    return this.assignorService.findById(params.id);
   }
 
   @Put('payable/:id')
   async updatePayable(
-    @Param('id') id: string,
+    @Param() params: UuidParamDto,
     @Body() updatePayableDto: UpdatePayableDto,
   ) {
-    return this.payableService.update(id, updatePayableDto);
+    return this.payableService.update(params.id, updatePayableDto);
   }
 
   @Put('assignor/:id')
   async updateAssignor(
-    @Param('id') id: string,
+    @Param() params: UuidParamDto,
     @Body() updateAssignorDto: UpdateAssignorDto,
   ) {
-    return this.assignorService.update(id, updateAssignorDto);
+    return this.assignorService.update(params.id, updateAssignorDto);
   }
 
   @Delete('payable/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePayable(@Param('id') id: string) {
-    await this.payableService.delete(id);
+  async deletePayable(@Param() params: UuidParamDto) {
+    await this.payableService.delete(params.id);
   }
 
   @Delete('assignor/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAssignor(@Param('id') id: string) {
-    await this.assignorService.delete(id);
+  async deleteAssignor(@Param() params: UuidParamDto) {
+    await this.assignorService.delete(params.id);
   }
 }
