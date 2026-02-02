@@ -1,11 +1,9 @@
 import {
   Injectable,
-  Inject,
   OnModuleInit,
   Logger,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { connect } from 'amqplib';
 
 @Injectable()
@@ -16,12 +14,15 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     ReturnType<Awaited<ReturnType<typeof connect>>['createChannel']>
   > | null = null;
 
-  constructor(
-    @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
-  ) {}
+  constructor() {}
 
   async onModuleInit() {
-    await this.setupQueues();
+    try {
+      await this.setupQueues();
+    } catch (error) {
+      this.logger.warn('RabbitMQ not available, queue service disabled');
+      this.logger.warn('This is expected when running without Docker');
+    }
   }
 
   private async setupQueues() {

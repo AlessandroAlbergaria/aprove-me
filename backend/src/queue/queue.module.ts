@@ -4,6 +4,7 @@ import { QueueService } from './queue.service';
 import { PayableBatchProcessor } from './payable-batch.processor';
 import { PayableModule } from '../modules/payable/payable.module';
 import { AssignorModule } from '../modules/assignor/assignor.module';
+import { MailModule } from '../mail';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AssignorModule } from '../modules/assignor/assignor.module';
     ]),
     PayableModule,
     AssignorModule,
+    MailModule,
   ],
   providers: [QueueService, PayableBatchProcessor],
   exports: [ClientsModule, QueueService, PayableBatchProcessor],

@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { connect } from 'amqplib';
 import { PayableService } from '../modules/payable/payable.service';
 import { AssignorService } from '../modules/assignor/assignor.service';
+import { MailService } from '../mail';
 
 interface BatchMessage {
   batchId: string;
@@ -35,10 +36,16 @@ export class PayableBatchProcessor implements OnModuleInit {
   constructor(
     private readonly payableService: PayableService,
     private readonly assignorService: AssignorService,
+    private readonly mailService: MailService,
   ) {}
 
   async onModuleInit() {
-    await this.startConsumer();
+    try {
+      await this.startConsumer();
+    } catch (error) {
+      this.logger.warn('RabbitMQ not available, batch processor disabled');
+      this.logger.warn('This is expected when running without Docker');
+    }
   }
 
   private async startConsumer() {
@@ -73,6 +80,8 @@ export class PayableBatchProcessor implements OnModuleInit {
               `Batch ${stats.batchId} completed: ${stats.succeeded} succeeded, ${stats.failed} failed`,
             );
 
+            await this.mailService.sendBatchCompletedEmail(stats);
+
             this.channel?.ack(msg);
           } catch (error) {
             this.logger.error('Error processing message', error);
@@ -84,6 +93,22 @@ export class PayableBatchProcessor implements OnModuleInit {
               this.logger.warn(
                 `Message exceeded retry limit (${retryCount}), moving to DLQ`,
               );
+
+              try {
+                const content = msg.content.toString();
+                const batchMessage: BatchMessage = JSON.parse(content);
+                await this.mailService.sendDLQNotificationEmail(
+                  batchMessage.batchId,
+                  'batch-message',
+                  error instanceof Error ? error.message : 'Unknown error',
+                );
+              } catch (emailError) {
+                this.logger.error(
+                  'Failed to send DLQ notification email',
+                  emailError,
+                );
+              }
+
               this.channel?.nack(msg, false, false);
             } else {
               this.logger.log(`Retrying message (attempt ${retryCount}/4)`);

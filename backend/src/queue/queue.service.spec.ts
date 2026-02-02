@@ -51,7 +51,7 @@ describe('QueueService', () => {
 
   describe('sendToQueue', () => {
     it('should throw error if channel is not initialized', async () => {
-      const newService = new QueueService(mockClientProxy as never);
+      const newService = new QueueService();
 
       await expect(
         newService.sendToQueue('test-queue', { test: 'data' }),
@@ -61,7 +61,7 @@ describe('QueueService', () => {
 
   describe('getQueueMessageCount', () => {
     it('should return 0 if channel is not initialized', async () => {
-      const newService = new QueueService(mockClientProxy as never);
+      const newService = new QueueService();
 
       const count = await newService.getQueueMessageCount('test-queue');
 

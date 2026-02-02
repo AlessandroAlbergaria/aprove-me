@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PayableBatchProcessor } from './payable-batch.processor';
 import { PayableService } from '../modules/payable/payable.service';
 import { AssignorService } from '../modules/assignor/assignor.service';
+import { MailService } from '../mail';
 
 jest.mock('amqplib', () => ({
   connect: jest.fn().mockResolvedValue({
@@ -30,6 +31,11 @@ describe('PayableBatchProcessor', () => {
     create: jest.fn(),
   };
 
+  const mockMailService = {
+    sendBatchCompletedEmail: jest.fn().mockResolvedValue(undefined),
+    sendDLQNotificationEmail: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -43,6 +49,10 @@ describe('PayableBatchProcessor', () => {
         {
           provide: AssignorService,
           useValue: mockAssignorService,
+        },
+        {
+          provide: MailService,
+          useValue: mockMailService,
         },
       ],
     }).compile();
