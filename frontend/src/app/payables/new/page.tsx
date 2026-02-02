@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout';
 import { PayableForm } from '@/components/forms';
 import { PayableFormData } from '@/lib/schemas';
+import { payablesService } from '@/lib/api';
 
 export default function NewPayablePage() {
   const router = useRouter();
 
   const handleSubmit = async (data: PayableFormData) => {
-    console.log('Payable data:', data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return Promise.resolve();
+    await payablesService.create({
+      id: data.id,
+      value: data.value,
+      emissionDate: data.emissionDate,
+      assignor: data.assignor,
+    });
   };
 
   const handleSuccess = (data: PayableFormData) => {

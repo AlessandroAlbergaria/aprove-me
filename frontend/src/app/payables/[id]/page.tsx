@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, Alert } from '@/components/ui';
+import { payablesService } from '@/lib/api';
+import type { Payable } from '@/types';
 
 interface PayableDetailsPageProps {
   params: {
@@ -12,13 +14,25 @@ interface PayableDetailsPageProps {
 }
 
 export default function PayableDetailsPage({ params }: PayableDetailsPageProps) {
-  const mockPayable = {
-    id: params.id,
-    value: 1500.0,
-    emissionDate: '2024-01-15',
-    assignor: '550e8400-e29b-41d4-a716-446655440001',
-    createdAt: new Date().toISOString(),
-  };
+  const [payable, setPayable] = useState<Payable | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPayable = async () => {
+      try {
+        setLoading(true);
+        const data = await payablesService.getById(params.id);
+        setPayable(data);
+      } catch (err: any) {
+        setError(err.message || 'Erro ao carregar recebível');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayable();
+  }, [params.id]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -34,6 +48,37 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
       year: 'numeric',
     }).format(new Date(date));
   };
+
+  if (loading) {
+    return (
+      <MainLayout title="Aprove-me">
+        <div className="max-w-2xl mx-auto">
+          <Card title="Carregando...">
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error || !payable) {
+    return (
+      <MainLayout title="Aprove-me">
+        <div className="max-w-2xl mx-auto">
+          <Alert variant="error" title="Erro">
+            {error || 'Recebível não encontrado'}
+          </Alert>
+          <div className="mt-4">
+            <Link href="/payables/new">
+              <Button variant="primary">Voltar</Button>
+            </Link>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Aprove-me">
@@ -72,7 +117,7 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
                   ID
                 </label>
                 <p className="mt-1 text-sm text-gray-900 font-mono break-all">
-                  {mockPayable.id}
+                  {payable.id}
                 </p>
               </div>
 
@@ -81,7 +126,7 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
                   Valor
                 </label>
                 <p className="mt-1 text-lg font-semibold text-green-600">
-                  {formatCurrency(mockPayable.value)}
+                  {formatCurrency(payable.value)}
                 </p>
               </div>
             </div>
@@ -92,18 +137,20 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
                   Data de Emissão
                 </label>
                 <p className="mt-1 text-sm text-gray-900">
-                  {formatDate(mockPayable.emissionDate)}
+                  {formatDate(payable.emissionDate)}
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-500">
-                  Data de Cadastro
-                </label>
-                <p className="mt-1 text-sm text-gray-900">
-                  {formatDate(mockPayable.createdAt)}
-                </p>
-              </div>
+              {payable.createdAt && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500">
+                    Data de Cadastro
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {formatDate(payable.createdAt)}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -111,38 +158,12 @@ export default function PayableDetailsPage({ params }: PayableDetailsPageProps) 
                 Cedente (ID)
               </label>
               <p className="mt-1 text-sm text-gray-900 font-mono break-all">
-                {mockPayable.assignor}
+                {payable.assignor}
               </p>
             </div>
           </div>
         </Card>
 
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-blue-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Informação
-              </h3>
-              <p className="mt-2 text-sm text-blue-700">
-                Este é um exemplo de exibição. Na próxima fase, os dados serão
-                carregados da API.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </MainLayout>
   );
