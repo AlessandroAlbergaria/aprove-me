@@ -10,8 +10,8 @@ env:
   NODE_VERSION: '18.x'
 
 jobs:
-  lint:
-    name: Lint Code
+  lint-backend:
+    name: Lint Backend
     runs-on: ubuntu-latest
     
     steps:
@@ -37,8 +37,35 @@ jobs:
         working-directory: backend
         run: yarn build
 
-  test:
-    name: Run Tests
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: yarn install --frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: yarn lint
+
+      - name: Check TypeScript
+        working-directory: frontend
+        run: yarn build
+
+  test-backend:
+    name: Test Backend
     runs-on: ubuntu-latest
     
     steps:
@@ -66,6 +93,37 @@ jobs:
           files: ./backend/coverage/lcov.info
           flags: backend
           name: backend-coverage
+          fail_ci_if_error: false
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: yarn install --frozen-lockfile
+
+      - name: Run unit tests
+        working-directory: frontend
+        run: yarn test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
           fail_ci_if_error: false
 
   test-e2e:
@@ -141,10 +199,10 @@ jobs:
           yarn audit --json > audit-report.json || true
           cat audit-report.json
 
-  docker-build:
-    name: Docker Build Test
+  docker-build-backend:
+    name: Docker Build Backend
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint-backend, test-backend]
     
     steps:
       - name: Checkout code
@@ -163,10 +221,42 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  docker-build-frontend:
+    name: Docker Build Frontend
+    runs-on: ubuntu-latest
+    needs: [lint-frontend, test-frontend]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (Production)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: aprove-me-frontend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Docker image (Development)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.dev
+          push: false
+          tags: aprove-me-frontend:dev
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, test-e2e, security, docker-build]
+    needs: [lint-backend, lint-frontend, test-backend, test-frontend, test-e2e, security, docker-build-backend, docker-build-frontend]
     if: always()
     
     steps:
@@ -174,8 +264,14 @@ jobs:
         run: |
           echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Backend" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint Backend: ${{ needs.lint-backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Backend: ${{ needs.test-backend.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- E2E Tests: ${{ needs.test-e2e.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Security: ${{ needs.security.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Docker Build: ${{ needs.docker-build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker Build Backend: ${{ needs.docker-build-backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Frontend" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint Frontend: ${{ needs.lint-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Frontend: ${{ needs.test-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker Build Frontend: ${{ needs.docker-build-frontend.result }}" >> $GITHUB_STEP_SUMMARY

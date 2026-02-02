@@ -35,8 +35,10 @@ export default function AssignorsPage() {
       
       setAssignors(paginatedData);
       setTotalPages(Math.ceil(data.length / itemsPerPage));
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar cedentes');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Erro ao carregar cedentes',
+      );
     } finally {
       setLoading(false);
     }
@@ -58,8 +60,10 @@ export default function AssignorsPage() {
     try {
       await assignorsService.delete(id);
       fetchAssignors();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao excluir cedente');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Erro ao excluir cedente',
+      );
     }
   };
 

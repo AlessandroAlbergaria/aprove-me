@@ -27,9 +27,11 @@ export default function LoginPage() {
       setError(null);
 
       await login(data);
-    } catch (err: any) {
+    } catch (err) {
       const errorMessage =
-        err.message || 'Erro ao fazer login. Verifique suas credenciais.';
+        err instanceof Error
+          ? err.message
+          : 'Erro ao fazer login. Verifique suas credenciais.';
       setError(errorMessage);
     } finally {
       setIsLoading(false);

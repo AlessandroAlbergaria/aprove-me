@@ -41,12 +41,15 @@ test_step() {
 echo -e "${BLUE}📋 Plano de Testes:${NC}"
 echo "  1. Validar workflows GitHub Actions"
 echo "  2. Validar Terraform"
-echo "  3. Lint (ESLint)"
-echo "  4. Build TypeScript"
-echo "  5. Testes Unitários"
-echo "  6. Testes E2E"
-echo "  7. Docker Compose"
-echo "  8. Infraestrutura Local (opcional)"
+echo "  3. Lint Backend (ESLint)"
+echo "  4. Lint Frontend (ESLint)"
+echo "  5. Build Backend (TypeScript)"
+echo "  6. Build Frontend (Next.js)"
+echo "  7. Testes Unitários Backend"
+echo "  8. Testes Unitários Frontend"
+echo "  9. Testes E2E Backend"
+echo "  10. Docker Compose"
+echo "  11. Infraestrutura Local (opcional)"
 echo ""
 
 read -p "Continuar? (y/n) " -n 1 -r
@@ -102,36 +105,63 @@ fi
 '
 
 # ============================================
-# TESTE 3: Lint
+# TESTE 3: Lint Backend
 # ============================================
-test_step "Lint (ESLint)" '
+test_step "Lint Backend (ESLint)" '
 cd backend
-echo "🔍 Rodando ESLint..."
+echo "🔍 Rodando ESLint no backend..."
 yarn lint
 '
 
 # ============================================
-# TESTE 4: Build
+# TESTE 4: Lint Frontend
 # ============================================
-test_step "Build TypeScript" '
+test_step "Lint Frontend (ESLint)" '
+cd frontend
+echo "🔍 Rodando ESLint no frontend..."
+yarn lint
+'
+
+# ============================================
+# TESTE 5: Build Backend
+# ============================================
+test_step "Build Backend (TypeScript)" '
 cd backend
-echo "🔨 Compilando TypeScript..."
+echo "🔨 Compilando TypeScript do backend..."
 yarn build
 '
 
 # ============================================
-# TESTE 5: Testes Unitários
+# TESTE 6: Build Frontend
 # ============================================
-test_step "Testes Unitários" '
+test_step "Build Frontend (Next.js)" '
+cd frontend
+echo "🔨 Compilando Next.js do frontend..."
+yarn build
+'
+
+# ============================================
+# TESTE 7: Testes Unitários Backend
+# ============================================
+test_step "Testes Unitários Backend" '
 cd backend
-echo "🧪 Rodando testes unitários..."
+echo "🧪 Rodando testes unitários do backend..."
 yarn test --passWithNoTests
 '
 
 # ============================================
-# TESTE 6: Testes E2E
+# TESTE 8: Testes Unitários Frontend
 # ============================================
-test_step "Testes E2E" '
+test_step "Testes Unitários Frontend" '
+cd frontend
+echo "🧪 Rodando testes unitários do frontend..."
+yarn test --passWithNoTests
+'
+
+# ============================================
+# TESTE 9: Testes E2E Backend
+# ============================================
+test_step "Testes E2E Backend" '
 cd backend
 
 echo "🐳 Iniciando PostgreSQL temporário..."
@@ -158,7 +188,7 @@ docker rm aprove-me-test-db > /dev/null 2>&1
 '
 
 # ============================================
-# TESTE 7: Docker Compose
+# TESTE 10: Docker Compose
 # ============================================
 test_step "Docker Compose" '
 cd infrastructure/local
@@ -168,7 +198,7 @@ echo "✅ Docker Compose válido"
 '
 
 # ============================================
-# TESTE 8: Infraestrutura Local (Opcional)
+# TESTE 11: Infraestrutura Local (Opcional)
 # ============================================
 echo ""
 echo "========================================"

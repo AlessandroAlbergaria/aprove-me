@@ -27,8 +27,10 @@ export default function AssignorDetailsPage({
         setLoading(true);
         const data = await assignorsService.getById(params.id);
         setAssignor(data);
-      } catch (err: any) {
-        setError(err.message || 'Erro ao carregar cedente');
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Erro ao carregar cedente',
+        );
       } finally {
         setLoading(false);
       }
