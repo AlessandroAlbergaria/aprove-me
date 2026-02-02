@@ -1,4 +1,10 @@
-import { IsUUID, IsNumber, IsDateString, IsNotEmpty, Min } from 'class-validator';
+import {
+  IsUUID,
+  IsNumber,
+  IsDateString,
+  IsNotEmpty,
+  Min,
+} from 'class-validator';
 
 export class CreatePayableDto {
   @IsUUID('4', { message: 'id deve ser um UUID válido' })

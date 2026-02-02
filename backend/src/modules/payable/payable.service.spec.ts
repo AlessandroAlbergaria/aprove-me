@@ -6,7 +6,6 @@ import { createMockPayable } from '../../test/factories';
 
 describe('PayableService', () => {
   let service: PayableService;
-  let repository: PayableRepository;
 
   const mockRepository = {
     create: jest.fn(),
@@ -28,7 +27,6 @@ describe('PayableService', () => {
     }).compile();
 
     service = module.get<PayableService>(PayableService);
-    repository = module.get<PayableRepository>(PayableRepository);
   });
 
   afterEach(() => {

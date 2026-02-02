@@ -7,9 +7,6 @@ import { createMockPayable, createMockAssignor } from '../../test/factories';
 
 describe('IntegrationsController', () => {
   let controller: IntegrationsController;
-  let integrationsService: IntegrationsService;
-  let payableService: PayableService;
-  let assignorService: AssignorService;
 
   const mockIntegrationsService = {
     createPayableWithAssignor: jest.fn(),
@@ -47,9 +44,6 @@ describe('IntegrationsController', () => {
     }).compile();
 
     controller = module.get<IntegrationsController>(IntegrationsController);
-    integrationsService = module.get<IntegrationsService>(IntegrationsService);
-    payableService = module.get<PayableService>(PayableService);
-    assignorService = module.get<AssignorService>(AssignorService);
   });
 
   afterEach(() => {

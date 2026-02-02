@@ -6,7 +6,6 @@ import { createMockAssignor } from '../../test/factories';
 
 describe('AssignorService', () => {
   let service: AssignorService;
-  let repository: AssignorRepository;
 
   const mockRepository = {
     create: jest.fn(),
@@ -29,7 +28,6 @@ describe('AssignorService', () => {
     }).compile();
 
     service = module.get<AssignorService>(AssignorService);
-    repository = module.get<AssignorRepository>(AssignorRepository);
   });
 
   afterEach(() => {
@@ -164,12 +162,10 @@ describe('AssignorService', () => {
       mockRepository.findById.mockResolvedValue(mockAssignor1);
       mockRepository.findByDocument.mockResolvedValue(mockAssignor2);
 
-      await expect(
-        service.update(mockAssignor1.id, updateDto),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.update(mockAssignor1.id, updateDto),
-      ).rejects.toThrow(
+      await expect(service.update(mockAssignor1.id, updateDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.update(mockAssignor1.id, updateDto)).rejects.toThrow(
         `Cedente com documento ${updateDto.document} já existe`,
       );
     });
