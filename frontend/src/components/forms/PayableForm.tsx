@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input, Button, Card, Alert } from '@/components/ui';
 import { payableSchema, type PayableFormData } from '@/lib/schemas';
+import { assignorsService } from '@/lib/api';
+import type { Assignor } from '@/types';
 
 export interface PayableFormProps {
   onSubmit: (data: PayableFormData) => Promise<void>;
@@ -22,6 +24,8 @@ export const PayableForm: React.FC<PayableFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [assignors, setAssignors] = useState<Assignor[]>([]);
+  const [loadingAssignors, setLoadingAssignors] = useState(true);
 
   const {
     register,
@@ -32,6 +36,22 @@ export const PayableForm: React.FC<PayableFormProps> = ({
     resolver: zodResolver(payableSchema),
     defaultValues: initialData,
   });
+
+  useEffect(() => {
+    const fetchAssignors = async () => {
+      try {
+        setLoadingAssignors(true);
+        const data = await assignorsService.getAll();
+        setAssignors(data);
+      } catch (err) {
+        console.error('Erro ao carregar cedentes:', err);
+      } finally {
+        setLoadingAssignors(false);
+      }
+    };
+
+    fetchAssignors();
+  }, []);
 
   const onSubmitForm = async (data: PayableFormData) => {
     try {
@@ -100,15 +120,48 @@ export const PayableForm: React.FC<PayableFormProps> = ({
           {...register('emissionDate')}
         />
 
-        <Input
-          label="Cedente (ID)"
-          type="text"
-          placeholder="550e8400-e29b-41d4-a716-446655440001"
-          error={errors.assignor?.message}
-          helperText="UUID v4 do cedente"
-          required
-          {...register('assignor')}
-        />
+        <div className="w-full">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Cedente
+            <span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            className={`w-full px-4 py-2 rounded-lg border transition-colors ${
+              errors.assignor
+                ? 'border-red-500 focus:border-red-600 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+            } focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+            {...register('assignor')}
+            disabled={loadingAssignors}
+          >
+            <option value="">
+              {loadingAssignors ? 'Carregando...' : 'Selecione um cedente'}
+            </option>
+            {assignors.map((assignor) => (
+              <option key={assignor.id} value={assignor.id}>
+                {assignor.name} - {assignor.document}
+              </option>
+            ))}
+          </select>
+          {errors.assignor && (
+            <p className="mt-1 text-sm text-red-600" role="alert">
+              {errors.assignor.message}
+            </p>
+          )}
+          {!loadingAssignors && assignors.length === 0 && (
+            <p className="mt-1 text-sm text-gray-500">
+              Nenhum cedente cadastrado.{' '}
+              <a href="/assignors/new" className="text-blue-600 hover:underline">
+                Cadastre um cedente primeiro
+              </a>
+            </p>
+          )}
+          {!errors.assignor && assignors.length > 0 && (
+            <p className="mt-1 text-sm text-gray-500">
+              Selecione o cedente responsável
+            </p>
+          )}
+        </div>
 
         <div className="flex gap-4 pt-4">
           <Button

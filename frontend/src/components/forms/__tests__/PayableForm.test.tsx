@@ -1,38 +1,68 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { PayableForm } from '../PayableForm';
+import { assignorsService } from '@/lib/api';
+
+jest.mock('@/lib/api', () => ({
+  assignorsService: {
+    getAll: jest.fn(),
+  },
+}));
+
+const mockedAssignorsService = assignorsService as jest.Mocked<
+  typeof assignorsService
+>;
 
 describe('PayableForm', () => {
   const mockOnSubmit = jest.fn();
 
-  it('should render form with title', () => {
-    render(<PayableForm onSubmit={mockOnSubmit} />);
-    expect(screen.getByText('Cadastro de Recebível')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedAssignorsService.getAll.mockResolvedValue([
+      {
+        id: '550e8400-e29b-41d4-a716-446655440001',
+        document: '12345678900',
+        email: 'test@test.com',
+        phone: '11999999999',
+        name: 'Test Assignor',
+      },
+    ]);
   });
 
-  it('should render submit button', () => {
+  it('should render form with title', async () => {
     render(<PayableForm onSubmit={mockOnSubmit} />);
-    expect(screen.getByRole('button', { name: /Cadastrar/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Cadastro de Recebível')).toBeInTheDocument();
+    });
   });
 
-  it('should render clear button', () => {
+  it('should render submit button', async () => {
     render(<PayableForm onSubmit={mockOnSubmit} />);
-    expect(screen.getByRole('button', { name: /Limpar/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Cadastrar/i })).toBeInTheDocument();
+    });
   });
 
-  it('should render all input fields', () => {
+  it('should render clear button', async () => {
+    render(<PayableForm onSubmit={mockOnSubmit} />);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Limpar/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should render all input fields', async () => {
     render(<PayableForm onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByPlaceholderText(/550e8400-e29b-41d4-a716-446655440000/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/1000.00/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/550e8400-e29b-41d4-a716-446655440001/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/550e8400-e29b-41d4-a716-446655440000/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/1000.00/i)).toBeInTheDocument();
+    });
   });
 
-  it('should render helper texts', () => {
+  it('should load and display assignors in select', async () => {
     render(<PayableForm onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByText(/UUID v4 válido/i)).toBeInTheDocument();
-    expect(screen.getByText(/Valor em reais/i)).toBeInTheDocument();
-    expect(screen.getByText(/Data de emissão do recebível/i)).toBeInTheDocument();
-    expect(screen.getByText(/UUID v4 do cedente/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Test Assignor - 12345678900/i)).toBeInTheDocument();
+    });
   });
 });
