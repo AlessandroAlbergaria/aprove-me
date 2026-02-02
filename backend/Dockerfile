@@ -9,6 +9,8 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
+ENV DATABASE_URL="file:./prisma/dev.db"
+
 RUN npx prisma generate
 RUN yarn build
 

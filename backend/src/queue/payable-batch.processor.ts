@@ -57,6 +57,20 @@ export class PayableBatchProcessor implements OnModuleInit {
       this.connection = await connect(rabbitMQUrl);
       this.channel = await this.connection.createChannel();
 
+      const dlqName = process.env.RABBITMQ_DLQ || 'payable-batch-dlq';
+
+      await this.channel.assertQueue(dlqName, {
+        durable: true,
+      });
+
+      await this.channel.assertQueue(queueName, {
+        durable: true,
+        arguments: {
+          'x-dead-letter-exchange': '',
+          'x-dead-letter-routing-key': dlqName,
+        },
+      });
+
       await this.channel.prefetch(1);
 
       this.logger.log(`Starting consumer for queue: ${queueName}`);
