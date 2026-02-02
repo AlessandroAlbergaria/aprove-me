@@ -31,6 +31,8 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: backend
+        env:
+          DATABASE_URL: file:./prisma/dev.db
         run: npx prisma generate
 
       - name: Run ESLint
@@ -89,6 +91,8 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: backend
+        env:
+          DATABASE_URL: file:./prisma/dev.db
         run: npx prisma generate
 
       - name: Run unit tests

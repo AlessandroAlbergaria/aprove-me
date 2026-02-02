@@ -72,7 +72,8 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
-      - frontend-node-modules:/app/node_modules
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/yarn.lock:/app/yarn.lock
     depends_on:
       backend:
         condition: service_healthy
