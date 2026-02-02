@@ -9,7 +9,8 @@ Infraestrutura completa para rodar **100% localmente** sem custos de cloud.
 | **PostgreSQL** | `aprove-me-postgres` | 5432 | Cloud SQL |
 | **Redis** | `aprove-me-redis` | 6379 | Cloud Memorystore |
 | **RabbitMQ** | `aprove-me-rabbitmq` | 5672, 15672 | Cloud Pub/Sub |
-| **Backend** | `aprove-me-backend` | 3000 | Cloud Run |
+| **Backend** | `aprove-me-backend` | 3000 | Cloud Run (API) |
+| **Frontend** | `aprove-me-frontend` | 3001 | Cloud Run (Web) |
 | **PgAdmin** | `aprove-me-pgadmin` | 5050 | (Opcional) |
 
 ## 🚀 Quick Start
@@ -46,6 +47,13 @@ docker-compose -f docker-compose.full.yml ps
 ```
 
 ## 📊 Acessar Serviços
+
+### Frontend Web
+```
+http://localhost:3001
+```
+
+**Interface web para gerenciar recebíveis e cedentes**
 
 ### Backend API
 ```
